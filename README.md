@@ -22,7 +22,7 @@ This add-on:
 
 ```bash
 # Install the add-on (also installs the Lullabot/ddev-playwright dependency)
-ddev add-on install <path-or-github-repo>
+ddev add-on install mherchel/ddev-drupal-admin-vrt
 
 # Restart DDEV to pick up the new docker-compose config
 ddev restart
