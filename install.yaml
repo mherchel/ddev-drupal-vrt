@@ -13,16 +13,11 @@ pre_install_actions:
     fi
 
 project_files:
-  - source: commands/web/vrt
-    destination: commands/web/vrt
-  - source: commands/web/vrt-update
-    destination: commands/web/vrt-update
-  - source: commands/web/vrt-report
-    destination: commands/web/vrt-report
-  - source: docker-compose.vrt-report.yaml
-    destination: docker-compose.vrt-report.yaml
-  - source: drupal-admin-vrt
-    destination: drupal-admin-vrt
+  - commands/web/vrt
+  - commands/web/vrt-update
+  - commands/web/vrt-report
+  - docker-compose.vrt-report.yaml
+  - drupal-admin-vrt
 
 post_install_actions:
   - |
