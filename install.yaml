@@ -1,0 +1,41 @@
+name: ddev-drupal-admin-vrt
+
+ddev_version_constraint: ">= v1.24.0"
+
+dependencies:
+  - "Lullabot/ddev-playwright"
+
+pre_install_actions:
+  - |
+    if [ ! -f ".ddev/config.yaml" ]; then
+      echo "Error: Must be run inside a DDEV project"
+      exit 1
+    fi
+
+project_files:
+  - source: commands/web/vrt
+    destination: commands/web/vrt
+  - source: commands/web/vrt-update
+    destination: commands/web/vrt-update
+  - source: commands/web/vrt-report
+    destination: commands/web/vrt-report
+  - source: docker-compose.vrt-report.yaml
+    destination: docker-compose.vrt-report.yaml
+  - source: drupal-admin-vrt
+    destination: drupal-admin-vrt
+
+post_install_actions:
+  - |
+    mkdir -p ${DDEV_APPROOT}/__screenshots__
+    grep -qxF 'test-results/' ${DDEV_APPROOT}/.gitignore 2>/dev/null || echo 'test-results/' >> ${DDEV_APPROOT}/.gitignore
+    grep -qxF 'playwright-report/' ${DDEV_APPROOT}/.gitignore 2>/dev/null || echo 'playwright-report/' >> ${DDEV_APPROOT}/.gitignore
+    echo ""
+    echo "VRT add-on installed! Next steps:"
+    echo "  1. ddev restart"
+    echo "  2. ddev exec -d /var/www/html/.ddev/drupal-admin-vrt npm install"
+    echo "  3. ddev install-playwright"
+    echo ""
+
+removal_actions:
+  - rm -rf .ddev/drupal-admin-vrt
+  - rm -f .ddev/docker-compose.vrt-report.yaml

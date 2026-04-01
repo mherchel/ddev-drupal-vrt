@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+## Description: Show the VRT HTML diff report
+## Usage: vrt-report
+## Example: ddev vrt-report
+
+cd /var/www/html/.ddev/drupal-admin-vrt
+echo "Report will be available at: https://${DDEV_HOSTNAME}:9324"
+npx playwright show-report --host 0.0.0.0 --port 9323

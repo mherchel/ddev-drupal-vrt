@@ -1,0 +1,8 @@
+#ddev-generated
+services:
+  web:
+    expose:
+      - "9323"
+    environment:
+      - HTTP_EXPOSE=${DDEV_ROUTER_HTTP_PORT}:80,9323:9323
+      - HTTPS_EXPOSE=${DDEV_ROUTER_HTTPS_PORT}:80,9324:9323

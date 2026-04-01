@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+## Description: Run visual regression tests (compare against baselines)
+## Usage: vrt [flags]
+## Example: ddev vrt\nddev vrt --project=narrow\nddev vrt tests/vrt/content.spec.ts
+
+cd /var/www/html/.ddev/drupal-admin-vrt
+npx playwright test "$@"

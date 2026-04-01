@@ -1,0 +1,11 @@
+/* Hide elements that produce non-deterministic output */
+td.views-field-changed,
+td.views-field-created,
+.toolbar-icon-user::after,
+[data-drupal-selector="edit-form-token"],
+.system-status-report__entry time,
+.dblog-event time,
+input[name="form_build_id"],
+.feed-icon {
+  visibility: hidden !important;
+}

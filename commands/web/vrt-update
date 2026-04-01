@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+## Description: Capture or update VRT baseline screenshots
+## Usage: vrt-update [flags]
+## Example: ddev vrt-update\nddev vrt-update --project=narrow
+
+cd /var/www/html/.ddev/drupal-admin-vrt
+npx playwright test "$@" --update-snapshots

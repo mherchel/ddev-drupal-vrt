@@ -1,0 +1,152 @@
+import type { Page } from '@playwright/test';
+
+export interface PageInteraction {
+  /** Human-readable label used in test names and screenshot filenames */
+  label: string;
+  /** Function that performs the interaction before screenshotting */
+  action: (page: Page) => Promise<void>;
+}
+
+export interface AdminPageDefinition {
+  /** Unique identifier used in test names and screenshot filenames */
+  id: string;
+  /** URL path relative to baseURL */
+  path: string;
+  /** Admin section for grouping (maps to test files) */
+  section: 'content' | 'structure' | 'appearance' | 'config' | 'people' | 'reports';
+  /** Wait for a specific selector before screenshotting */
+  waitFor?: string;
+  /** Take a full-page screenshot instead of viewport-only */
+  fullPage?: boolean;
+  /** Locator selectors to mask (e.g., dynamic content unique to a page) */
+  maskSelectors?: string[];
+  /** Custom timeout in ms for the screenshot stability check (default: 5000) */
+  timeout?: number;
+  /** Interactions to perform, each producing an additional screenshot */
+  interactions?: PageInteraction[];
+}
+
+export const adminPages: AdminPageDefinition[] = [
+  // --- Content ---
+  {
+    id: 'content-overview',
+    path: '/admin/content',
+    section: 'content',
+  },
+  {
+    id: 'node-add-article',
+    path: '/node/add/article',
+    section: 'content',
+    fullPage: true,
+  },
+  {
+    id: 'node-add-page',
+    path: '/node/add/page',
+    section: 'content',
+    fullPage: true,
+  },
+
+  // --- Structure ---
+  {
+    id: 'structure-overview',
+    path: '/admin/structure',
+    section: 'structure',
+  },
+  {
+    id: 'structure-content-types',
+    path: '/admin/structure/types',
+    section: 'structure',
+  },
+  {
+    id: 'structure-block-layout',
+    path: '/admin/structure/block',
+    section: 'structure',
+  },
+  {
+    id: 'structure-views',
+    path: '/admin/structure/views',
+    section: 'structure',
+  },
+  {
+    id: 'structure-taxonomy',
+    path: '/admin/structure/taxonomy',
+    section: 'structure',
+  },
+  {
+    id: 'structure-menus',
+    path: '/admin/structure/menu',
+    section: 'structure',
+  },
+
+  // --- Appearance ---
+  {
+    id: 'appearance-list',
+    path: '/admin/appearance',
+    section: 'appearance',
+  },
+
+  // --- Config ---
+  {
+    id: 'config-overview',
+    path: '/admin/config',
+    section: 'config',
+  },
+  {
+    id: 'config-site-info',
+    path: '/admin/config/system/site-information',
+    section: 'config',
+  },
+  {
+    id: 'config-performance',
+    path: '/admin/config/development/performance',
+    section: 'config',
+  },
+  {
+    id: 'config-text-formats',
+    path: '/admin/config/content/formats',
+    section: 'config',
+  },
+  {
+    id: 'config-media-file-system',
+    path: '/admin/config/media/file-system',
+    section: 'config',
+  },
+
+  // --- People ---
+  {
+    id: 'people-list',
+    path: '/admin/people',
+    section: 'people',
+  },
+  {
+    id: 'people-permissions',
+    path: '/admin/people/permissions',
+    section: 'people',
+    fullPage: true,
+    // Large page needs extra time for stable screenshot
+    timeout: 30000,
+  },
+  {
+    id: 'people-roles',
+    path: '/admin/people/roles',
+    section: 'people',
+  },
+
+  // --- Reports ---
+  {
+    id: 'reports-status',
+    path: '/admin/reports/status',
+    section: 'reports',
+    fullPage: true,
+  },
+  {
+    id: 'reports-dblog',
+    path: '/admin/reports/dblog',
+    section: 'reports',
+  },
+  {
+    id: 'reports-updates',
+    path: '/admin/reports/updates',
+    section: 'reports',
+  },
+];
