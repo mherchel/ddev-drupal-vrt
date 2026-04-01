@@ -5,3 +5,9 @@
 
 cd /var/www/html/.ddev/drupal-admin-vrt
 npx playwright test "$@"
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "To view the HTML diff report, run: ddev vrt-report"
+fi
+exit $EXIT_CODE

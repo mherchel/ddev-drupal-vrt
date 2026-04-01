@@ -5,4 +5,4 @@
 
 cd /var/www/html/.ddev/drupal-admin-vrt
 echo "Report will be available at: https://${DDEV_HOSTNAME}:9324"
-npx playwright show-report --host 0.0.0.0 --port 9323
+npx playwright show-report ../../playwright-report --host 0.0.0.0 --port 9323

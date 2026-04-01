@@ -2,9 +2,6 @@ name: ddev-drupal-admin-vrt
 
 ddev_version_constraint: ">= v1.24.0"
 
-dependencies:
-  - "Lullabot/ddev-playwright"
-
 pre_install_actions:
   - |
     if [ ! -f ".ddev/config.yaml" ]; then
@@ -28,7 +25,7 @@ post_install_actions:
     echo "VRT add-on installed! Next steps:"
     echo "  1. ddev restart"
     echo "  2. ddev exec -d /var/www/html/.ddev/drupal-admin-vrt npm install"
-    echo "  3. ddev install-playwright"
+    echo "  3. ddev exec -d /var/www/html/.ddev/drupal-admin-vrt npx playwright install --with-deps chromium"
     echo ""
 
 removal_actions:

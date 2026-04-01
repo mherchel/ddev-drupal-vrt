@@ -7,7 +7,7 @@ A DDEV add-on that provides visual regression testing for Drupal's `default_admi
 This add-on:
 
 - **Screenshots admin pages** at three viewport widths (narrow 375px, mid 768px, wide 1280px)
-- **Compares screenshots** against committed baseline images using Playwright's built-in `toHaveScreenshot()`
+- **Compares screenshots** against baseline images using Playwright's built-in `toHaveScreenshot()`
 - **Reports visual differences** with an interactive HTML report showing side-by-side diffs
 - **Handles authentication** automatically via `drush uli` (no manual login needed)
 - **Runs inside the DDEV container** so screenshots are consistent across macOS, Linux, and Windows — no "works on my machine" issues
@@ -16,23 +16,37 @@ This add-on:
 
 - [DDEV](https://ddev.com/) v1.24.0 or later
 - A Drupal project running in DDEV with the `default_admin` theme installed and set as the admin theme
-- An installed Drupal site (the add-on uses `drush uli` to authenticate)
+- An installed Drupal site with the database set up (run `ddev drush site:install` if starting fresh)
+- [Drush](https://www.drush.org/) installed (`ddev composer require drush/drush` if not already present)
+- The `default_admin` theme installed and set as the admin theme:
+  ```bash
+  ddev drush theme:install default_admin -y
+  ddev drush config:set system.theme admin default_admin -y
+  ```
 
 ## Installation
 
 ```bash
-# Install the add-on (also installs the Lullabot/ddev-playwright dependency)
+# Install the add-on
 ddev add-on install https://github.com/mherchel/ddev-drupal-admin-vrt/tarball/main
 
 # Restart DDEV to pick up the new docker-compose config
 ddev restart
 
-# Install Node.js dependencies
+# Install Node.js dependencies and Chromium browser
 ddev exec -d /var/www/html/.ddev/drupal-admin-vrt npm install
-
-# Install Chromium browser (provided by ddev-playwright)
-ddev install-playwright
+ddev exec -d /var/www/html/.ddev/drupal-admin-vrt npx playwright install --with-deps chromium
 ```
+
+## Configuring which pages to test
+
+The list of admin pages to screenshot is defined in:
+
+```
+.ddev/drupal-admin-vrt/page-definitions/admin-pages.ts
+```
+
+Edit this file to add, remove, or modify pages. See [Adding pages](#adding-pages) for details and examples.
 
 ## Usage
 
@@ -52,13 +66,6 @@ __screenshots__/
 ├── narrow/    # 375px viewport
 ├── mid/       # 768px viewport
 └── wide/      # 1280px viewport
-```
-
-Commit these baselines to git:
-
-```bash
-git add __screenshots__/
-git commit -m "Update VRT baselines"
 ```
 
 ### Compare against baselines
@@ -99,8 +106,6 @@ If your feature branch intentionally changes the UI, update the baselines:
 
 ```bash
 ddev vrt-update
-git add __screenshots__/
-git commit -m "Update VRT baselines for theme changes"
 ```
 
 ### Target specific viewports or sections
@@ -230,7 +235,7 @@ Baselines and test output live in the project root:
 
 ```
 project-root/
-├── __screenshots__/     # Baseline PNGs (commit to git)
+├── __screenshots__/     # Baseline PNGs
 └── test-results/        # Diff output (gitignored)
 ```
 
@@ -270,6 +275,10 @@ DRUPAL_ADMIN_PASS=admin
 The `BASE_URL` environment variable can override the default `https://localhost` if the Drupal site is at a different address in CI.
 
 ## Troubleshooting
+
+### "Command uli was not found" or "Drush was unable to query the database"
+
+Drupal is not installed. Run `ddev drush site:install` (or your project's site install command) before running VRT tests.
 
 ### Tests fail on first run after installation
 
