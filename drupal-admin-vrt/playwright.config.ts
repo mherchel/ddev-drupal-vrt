@@ -75,5 +75,35 @@ export default defineConfig({
       dependencies: ['auth-setup'],
       testMatch: /.*\.spec\.ts/,
     },
+    {
+      name: 'rtl-narrow',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 375, height: 812 },
+        storageState: path.join(__dirname, '.auth/admin.json'),
+      },
+      dependencies: ['auth-setup'],
+      testMatch: /.*\.spec\.ts/,
+    },
+    {
+      name: 'rtl-mid',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 768, height: 1024 },
+        storageState: path.join(__dirname, '.auth/admin.json'),
+      },
+      dependencies: ['auth-setup'],
+      testMatch: /.*\.spec\.ts/,
+    },
+    {
+      name: 'rtl-wide',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 900 },
+        storageState: path.join(__dirname, '.auth/admin.json'),
+      },
+      dependencies: ['auth-setup'],
+      testMatch: /.*\.spec\.ts/,
+    },
   ],
 });

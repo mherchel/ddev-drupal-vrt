@@ -4,8 +4,14 @@ import type { AdminPageDefinition } from '../../page-definitions/admin-pages.js'
 export function generateVrtTests(pages: AdminPageDefinition[]) {
   for (const pageDef of pages) {
     test.describe(pageDef.id, () => {
-      test('default state', async ({ page }) => {
+      test('default state', async ({ page }, testInfo) => {
         await page.goto(pageDef.path);
+
+        if (testInfo.project.name.startsWith('rtl-')) {
+          await page.evaluate(() => {
+            document.documentElement.dir = 'rtl';
+          });
+        }
 
         if (pageDef.waitFor) {
           await page.locator(pageDef.waitFor).waitFor();
@@ -25,8 +31,14 @@ export function generateVrtTests(pages: AdminPageDefinition[]) {
 
       if (pageDef.interactions) {
         for (const interaction of pageDef.interactions) {
-          test(`interaction: ${interaction.label}`, async ({ page }) => {
+          test(`interaction: ${interaction.label}`, async ({ page }, testInfo) => {
             await page.goto(pageDef.path);
+
+            if (testInfo.project.name.startsWith('rtl-')) {
+              await page.evaluate(() => {
+                document.documentElement.dir = 'rtl';
+              });
+            }
 
             if (pageDef.waitFor) {
               await page.locator(pageDef.waitFor).waitFor();
