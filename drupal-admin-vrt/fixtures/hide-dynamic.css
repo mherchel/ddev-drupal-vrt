@@ -9,3 +9,8 @@ input[name="form_build_id"],
 .feed-icon {
   visibility: hidden !important;
 }
+
+/* Hide cron timestamp on reports page. */
+.system-status-general-info__items .system-status-general-info__item:nth-child(3) .system-status-general-info__item-details {
+  display: none;
+}
