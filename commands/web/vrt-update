@@ -1,10 +1,50 @@
 #!/usr/bin/env bash
 ## Description: Capture or update VRT baseline screenshots
 ## Usage: vrt-update [flags]
-## Example: ddev vrt-update\nddev vrt-update --project=narrow
+## Example: ddev vrt-update\nddev vrt-update --normal\nddev vrt-update --full\nddev vrt-update --project=narrow
+
+# Parse our custom flags, pass the rest through to Playwright.
+MODE=""
+PASSTHROUGH_ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --normal) MODE="normal" ;;
+    --full)   MODE="full" ;;
+    *)        PASSTHROUGH_ARGS+=("$arg") ;;
+  esac
+done
+
+# If no mode flag was given and no --project flag was passed, prompt.
+if [ -z "$MODE" ]; then
+  HAS_PROJECT=false
+  for arg in "${PASSTHROUGH_ARGS[@]}"; do
+    case "$arg" in --project=*|--project) HAS_PROJECT=true ;; esac
+  done
+
+  if [ "$HAS_PROJECT" = false ]; then
+    echo "Select test mode:"
+    echo "  1) Normal — narrow + wide viewports, LTR only (faster)"
+    echo "  2) Full   — all viewports and RTL"
+    read -r -p "Choice [1]: " CHOICE
+    case "$CHOICE" in
+      2) MODE="full" ;;
+      *) MODE="normal" ;;
+    esac
+  fi
+fi
 
 cd /var/www/html/.ddev/drupal-admin-vrt
-npx playwright test "$@" --update-snapshots
+
+# Build the Playwright command.
+CMD=(npx playwright test)
+if [ "$MODE" = "normal" ]; then
+  CMD+=(--project=narrow --project=wide)
+elif [ "$MODE" = "full" ]; then
+  :
+fi
+CMD+=("${PASSTHROUGH_ARGS[@]}" --update-snapshots)
+
+"${CMD[@]}"
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo ""

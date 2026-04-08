@@ -6,7 +6,8 @@ A DDEV add-on that provides visual regression testing for Drupal's `default_admi
 
 This add-on:
 
-- **Screenshots admin pages** at three viewport widths (narrow 375px, mid 768px, wide 1280px)
+- **Screenshots admin pages** at three viewport widths (narrow 375px, mid 768px, wide 1280px) in both LTR and RTL
+- **Two test modes**: Normal (narrow + wide, LTR only) for fast feedback, or Full (all viewports + RTL)
 - **Compares screenshots** against baseline images using Playwright's built-in `toHaveScreenshot()`
 - **Reports visual differences** with an interactive HTML report showing side-by-side diffs
 - **Handles authentication** automatically via `drush uli` (no manual login needed)
@@ -77,7 +78,23 @@ git checkout feature/my-theme-change
 ddev vrt
 ```
 
+You'll be prompted to choose a test mode:
+
+1. **Normal** (default) — runs narrow + wide viewports, LTR only. Faster for everyday development.
+2. **Full** — runs all viewports (narrow, mid, wide) and RTL variants.
+
+To skip the prompt, pass `--normal` or `--full`:
+
+```bash
+ddev vrt --normal    # Skip prompt, run normal mode
+ddev vrt --full      # Skip prompt, run full mode
+```
+
+The prompt is also skipped when you pass `--project` directly (e.g., `ddev vrt --project=narrow`).
+
 If all screenshots match, you'll see all tests pass. If there are visual differences, the tests will fail and Playwright will generate diff images.
+
+By default, the run stops early after 5 test failures to save time. Use `--no-bail` to run all tests regardless of failures.
 
 ### View the diff report
 
@@ -107,6 +124,8 @@ If your feature branch intentionally changes the UI, update the baselines:
 ```bash
 ddev vrt-update
 ```
+
+Like `ddev vrt`, this prompts for normal/full mode. Use `--normal` or `--full` to skip the prompt.
 
 ### Target specific viewports or sections
 
@@ -314,11 +333,16 @@ Run `ddev restart` to ensure the docker-compose port mapping is loaded, then try
 
 | Command | Description |
 |---|---|
-| `ddev vrt` | Run visual regression tests against baselines |
-| `ddev vrt-update` | Capture or update baseline screenshots |
+| `ddev vrt` | Run visual regression tests (prompts for normal/full mode) |
+| `ddev vrt --normal` | Run narrow + wide viewports, LTR only (skip prompt) |
+| `ddev vrt --full` | Run all viewports and RTL (skip prompt) |
+| `ddev vrt-update` | Capture or update baseline screenshots (prompts for mode) |
+| `ddev vrt-update --normal` | Update baselines for narrow + wide, LTR only |
+| `ddev vrt-update --full` | Update baselines for all viewports and RTL |
 | `ddev vrt-report` | Serve the HTML diff report |
 | `ddev vrt --project=narrow` | Run only narrow (375px) viewport |
 | `ddev vrt --project=mid` | Run only mid (768px) viewport |
 | `ddev vrt --project=wide` | Run only wide (1280px) viewport |
 | `ddev vrt tests/vrt/content.spec.ts` | Run only content section |
+| `ddev vrt --no-bail` | Run all tests without stopping after 5 failures |
 | `ddev vrt --debug` | Run with Playwright inspector |
