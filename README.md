@@ -1,6 +1,20 @@
 # DDEV Drupal Admin VRT
 
-A DDEV add-on that provides visual regression testing for Drupal's `default_admin` theme using [Playwright](https://playwright.dev/). It screenshots 21 admin pages across 3 viewport sizes and compares them against baseline images, highlighting any visual differences.
+A DDEV add-on that provides visual regression testing for Drupal's `default_admin` theme using [Playwright](https://playwright.dev/). It screenshots 21 admin pages across 3 viewport sizes and compares them against baseline images, highlighting any visual differences. It also works with RTL layouts.
+
+## Commands reference
+
+| Command | Description | Options |
+|---|---|---|
+| `ddev vrt` | Run visual regression tests against baselines | `--normal` — narrow + wide, LTR only (skip prompt) |
+| | | `--full` — all viewports and RTL (skip prompt) |
+| | | `--no-bail` — don't stop after 5 failures |
+| | | `--project=<name>` — run a single viewport (`narrow`, `mid`, `wide`, `rtl-narrow`, `rtl-mid`, `rtl-wide`) |
+| | | `--debug` — run with Playwright inspector |
+| `ddev vrt-update` | Capture or update baseline screenshots | `--normal` — narrow + wide, LTR only (skip prompt) |
+| | | `--full` — all viewports and RTL (skip prompt) |
+| | | `--project=<name>` — update a single viewport |
+| `ddev vrt-report` | Serve the HTML diff report | — |
 
 ## What it does
 
@@ -16,14 +30,22 @@ This add-on:
 ## Prerequisites
 
 - [DDEV](https://ddev.com/) v1.24.0 or later
-- A Drupal project running in DDEV with the `default_admin` theme installed and set as the admin theme
+- A Drupal project running in DDEV
 - An installed Drupal site with the database set up (run `ddev drush site:install` if starting fresh)
 - [Drush](https://www.drush.org/) installed (`ddev composer require drush/drush` if not already present)
-- The `default_admin` theme installed and set as the admin theme:
-  ```bash
-  ddev drush theme:install default_admin -y
-  ddev drush config:set system.theme admin default_admin -y
-  ```
+
+## Setting up the `default_admin` theme in Drupal for testing
+
+Run the following to install the `default_admin` theme, set it as both the default and admin theme, and clear the cache:
+
+```bash
+ddev drush theme:install default_admin -y
+ddev drush config:set system.theme default default_admin -y
+ddev drush config:set system.theme admin default_admin -y
+ddev drush config:set system.performance css.preprocess 0 -y
+ddev drush config:set system.performance js.preprocess 0 -y
+ddev drush cr
+```
 
 ## Installation
 
@@ -328,21 +350,3 @@ Large pages (like Permissions) may need more time for Playwright to confirm the 
 ### Port 9324 not accessible for report
 
 Run `ddev restart` to ensure the docker-compose port mapping is loaded, then try `ddev vrt-report` again.
-
-## Commands reference
-
-| Command | Description |
-|---|---|
-| `ddev vrt` | Run visual regression tests (prompts for normal/full mode) |
-| `ddev vrt --normal` | Run narrow + wide viewports, LTR only (skip prompt) |
-| `ddev vrt --full` | Run all viewports and RTL (skip prompt) |
-| `ddev vrt-update` | Capture or update baseline screenshots (prompts for mode) |
-| `ddev vrt-update --normal` | Update baselines for narrow + wide, LTR only |
-| `ddev vrt-update --full` | Update baselines for all viewports and RTL |
-| `ddev vrt-report` | Serve the HTML diff report |
-| `ddev vrt --project=narrow` | Run only narrow (375px) viewport |
-| `ddev vrt --project=mid` | Run only mid (768px) viewport |
-| `ddev vrt --project=wide` | Run only wide (1280px) viewport |
-| `ddev vrt tests/vrt/content.spec.ts` | Run only content section |
-| `ddev vrt --no-bail` | Run all tests without stopping after 5 failures |
-| `ddev vrt --debug` | Run with Playwright inspector |
