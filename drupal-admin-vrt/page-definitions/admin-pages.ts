@@ -22,6 +22,8 @@ export interface AdminPageDefinition {
   maskSelectors?: string[];
   /** Custom timeout in ms for the screenshot stability check (default: 5000) */
   timeout?: number;
+  /** Custom timeout in ms for the overall test (default: Playwright's testTimeout) */
+  testTimeout?: number;
   /** Interactions to perform, each producing an additional screenshot */
   interactions?: PageInteraction[];
 }
@@ -125,6 +127,8 @@ export const adminPages: AdminPageDefinition[] = [
     fullPage: true,
     // Large page needs extra time for stable screenshot
     timeout: 30000,
+    // The permissions page has ongoing network activity that prevents networkidle
+    testTimeout: 60000,
   },
   {
     id: 'people-roles',

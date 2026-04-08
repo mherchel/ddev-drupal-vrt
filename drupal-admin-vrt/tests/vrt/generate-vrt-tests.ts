@@ -5,6 +5,10 @@ export function generateVrtTests(pages: AdminPageDefinition[]) {
   for (const pageDef of pages) {
     test.describe(pageDef.id, () => {
       test('default state', async ({ page }, testInfo) => {
+        if (pageDef.testTimeout) {
+          test.setTimeout(pageDef.testTimeout);
+        }
+
         await page.goto(pageDef.path);
 
         if (testInfo.project.name.startsWith('rtl-')) {
@@ -18,7 +22,9 @@ export function generateVrtTests(pages: AdminPageDefinition[]) {
         }
 
         // Wait for network to settle (images, AJAX, etc.)
-        await page.waitForLoadState('networkidle');
+        // Use 'load' for pages with custom testTimeout as they may have
+        // ongoing network activity that prevents networkidle from resolving.
+        await page.waitForLoadState(pageDef.testTimeout ? 'load' : 'networkidle');
 
         const mask = (pageDef.maskSelectors || []).map((s) => page.locator(s));
 
@@ -32,6 +38,10 @@ export function generateVrtTests(pages: AdminPageDefinition[]) {
       if (pageDef.interactions) {
         for (const interaction of pageDef.interactions) {
           test(`interaction: ${interaction.label}`, async ({ page }, testInfo) => {
+            if (pageDef.testTimeout) {
+              test.setTimeout(pageDef.testTimeout);
+            }
+
             await page.goto(pageDef.path);
 
             if (testInfo.project.name.startsWith('rtl-')) {
@@ -44,7 +54,7 @@ export function generateVrtTests(pages: AdminPageDefinition[]) {
               await page.locator(pageDef.waitFor).waitFor();
             }
 
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState(pageDef.testTimeout ? 'load' : 'networkidle');
             await interaction.action(page);
 
             const mask = (pageDef.maskSelectors || []).map((s) => page.locator(s));
