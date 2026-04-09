@@ -13,7 +13,7 @@ export interface AdminPageDefinition {
   /** URL path relative to baseURL */
   path: string;
   /** Admin section for grouping (maps to test files) */
-  section: 'content' | 'structure' | 'appearance' | 'config' | 'people' | 'reports';
+  section: 'content' | 'structure' | 'appearance' | 'config' | 'people' | 'reports' | 'theming-tools';
   /** Wait for a specific selector before screenshotting */
   waitFor?: string;
   /** Take a full-page screenshot instead of viewport-only */

@@ -2,6 +2,8 @@
 
 A DDEV add-on that provides visual regression testing for Drupal's `default_admin` theme using [Playwright](https://playwright.dev/). It screenshots 21 admin pages across 3 viewport sizes and compares them against baseline images, highlighting any visual differences. It also works with RTL layouts.
 
+It also optionally tests pages from the [Theming Tools](https://www.drupal.org/project/theming_tools) contrib module when it's installed.
+
 ## Commands reference
 
 | Command | Description | Options |
@@ -180,6 +182,81 @@ The add-on tests 21 admin pages grouped into 6 sections:
 
 Each page is screenshotted at 3 viewports = **63 total screenshots** per run.
 
+## Theming Tools integration
+
+The add-on optionally tests pages from the [Theming Tools](https://www.drupal.org/project/theming_tools) contrib module — a suite of test submodules that each exercise a specific UI component (buttons, dialogs, tables, form widgets, etc.).
+
+When `theming_tools` is installed and its submodules are enabled, the VRT suite automatically screenshots their test pages alongside the core admin pages. If `theming_tools` is not installed, these tests are silently skipped.
+
+### Setup
+
+Install the module in your Drupal project:
+
+```bash
+ddev composer require 'drupal/theming_tools:1.0.x-dev@dev'
+ddev drush en theming_tools
+```
+
+Then enable whichever test submodules you want to screenshot:
+
+```bash
+# Enable a few specific ones
+ddev drush en button dialog table dropbutton textform
+
+# Or enable all of them at once via the dashboard
+# Visit /admin/modules/theming-tools after enabling theming_tools
+```
+
+Some submodules (like `checkboxradio`, `textarea`, `textform`, `select`) depend on the `contact` module. Install it if needed:
+
+```bash
+ddev composer require drupal/contact
+ddev drush en contact
+```
+
+Once the submodules are enabled, capture baselines and run tests as usual:
+
+```bash
+ddev vrt-update
+ddev vrt
+```
+
+Tests for submodules that aren't enabled will be automatically skipped — you don't need to do anything special.
+
+### Tested theming_tools pages
+
+| Component | Pages |
+|---|---|
+| **Action Link** | Action link variants |
+| **Autocomplete** | Autocomplete widget |
+| **Buttons** | Button variants, disabled state |
+| **Checkbox & Radio** | Checkbox/radio contact form |
+| **Dialog** | Dialog page + modal interaction |
+| **Dropbutton** | Dropbutton, operations, Views |
+| **Field Cardinality** | Multi-value field widgets |
+| **Fieldset** | Fieldset component |
+| **Image & File** | File and image upload widgets |
+| **Message** | Short and long messages |
+| **Pager** | Pager component |
+| **Password** | Password confirm widget |
+| **Prefix/Suffix** | Text and number prefix/suffix |
+| **Progress** | Progress indicators |
+| **Select** | Select widgets |
+| **Tabs** | Local task tabs |
+| **Table** | Table component |
+| **Tabledrag** | Draggable tables, nested |
+| **Textarea** | Plain and formatted textareas |
+| **Text Form** | Text-like form items |
+
+The page definitions are in `.ddev/drupal-admin-vrt/page-definitions/theming-tools-pages.ts`.
+
+### Running only theming tools tests
+
+```bash
+ddev vrt tests/vrt/theming-tools.spec.ts
+ddev vrt-update tests/vrt/theming-tools.spec.ts
+```
+
 ## Adding pages
 
 To add a new admin page to the test suite, edit `.ddev/drupal-admin-vrt/page-definitions/admin-pages.ts` and add an entry to the `adminPages` array:
@@ -261,7 +338,8 @@ Each interaction generates an additional screenshot named `<id>--<label>.png`.
     │   ├── auth.setup.ts            # Automatic admin login
     │   └── hide-dynamic.css         # Hides timestamps, tokens, etc.
     ├── page-definitions/
-    │   └── admin-pages.ts           # Central registry of pages to test
+    │   ├── admin-pages.ts           # Central registry of admin pages to test
+    │   └── theming-tools-pages.ts   # Theming Tools module pages (optional)
     └── tests/vrt/
         ├── generate-vrt-tests.ts    # Test generator (shared logic)
         ├── content.spec.ts          # Content section tests
@@ -269,7 +347,8 @@ Each interaction generates an additional screenshot named `<id>--<label>.png`.
         ├── appearance.spec.ts       # Appearance section tests
         ├── config.spec.ts           # Config section tests
         ├── people.spec.ts           # People section tests
-        └── reports.spec.ts          # Reports section tests
+        ├── reports.spec.ts          # Reports section tests
+        └── theming-tools.spec.ts   # Theming Tools tests (auto-skipped if not installed)
 ```
 
 Baselines and test output live in the project root:

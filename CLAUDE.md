@@ -10,7 +10,9 @@ DDEV add-on that provides visual regression testing for Drupal's `default_admin`
 - `drupal-admin-vrt/playwright.config.ts` — Playwright config. Defines 4 projects: `auth-setup`, `narrow`, `mid`, `wide`. Snapshots go to `../../__screenshots__/`, test results to `../../test-results/`, reports to `../../playwright-report/` (all relative to the drupal-admin-vrt dir, landing in the Drupal project root).
 - `drupal-admin-vrt/fixtures/auth.setup.ts` — Logs in via `drush uli --uid=1` (no `--no-browser` flag, it doesn't exist in Drupal 12's drush). Falls back to form login when `DRUPAL_ADMIN_USER`/`DRUPAL_ADMIN_PASS` env vars are set.
 - `drupal-admin-vrt/page-definitions/admin-pages.ts` — Central registry of pages to test. Each entry has `id`, `path`, `section`, and optional `fullPage`, `waitFor`, `maskSelectors`, `timeout`, `interactions`.
+- `drupal-admin-vrt/page-definitions/theming-tools-pages.ts` — Page definitions for the optional theming_tools contrib module. Tests auto-skip when a submodule's route returns 404.
 - `drupal-admin-vrt/tests/vrt/generate-vrt-tests.ts` — Shared test generator consumed by per-section spec files.
+- `drupal-admin-vrt/tests/vrt/theming-tools.spec.ts` — Theming tools tests with per-test 404 skip logic (doesn't use the shared generator since it needs custom skip behavior).
 - `commands/web/vrt`, `commands/web/vrt-update`, `commands/web/vrt-report` — DDEV custom commands.
 
 ## Testing locally
