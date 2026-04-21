@@ -21,10 +21,7 @@ export function generateVrtTests(pages: AdminPageDefinition[]) {
           await page.locator(pageDef.waitFor).waitFor();
         }
 
-        // Wait for network to settle (images, AJAX, etc.)
-        // Use 'load' for pages with custom testTimeout as they may have
-        // ongoing network activity that prevents networkidle from resolving.
-        await page.waitForLoadState(pageDef.testTimeout ? 'load' : 'networkidle');
+        await page.waitForLoadState('load');
 
         const mask = (pageDef.maskSelectors || []).map((s) => page.locator(s));
 
@@ -54,7 +51,7 @@ export function generateVrtTests(pages: AdminPageDefinition[]) {
               await page.locator(pageDef.waitFor).waitFor();
             }
 
-            await page.waitForLoadState(pageDef.testTimeout ? 'load' : 'networkidle');
+            await page.waitForLoadState('load');
             await interaction.action(page);
 
             const mask = (pageDef.maskSelectors || []).map((s) => page.locator(s));

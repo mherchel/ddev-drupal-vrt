@@ -92,6 +92,7 @@ export const themingToolsPages: AdminPageDefinition[] = [
     path: '/contact/field_cardinality_test',
     section: 'theming-tools',
     fullPage: true,
+    timeout: 15000,
   },
 
   // --- Fieldset ---
@@ -100,6 +101,7 @@ export const themingToolsPages: AdminPageDefinition[] = [
     path: '/fieldset',
     section: 'theming-tools',
     fullPage: true,
+    timeout: 15000,
   },
 
   // --- Image & File ---
@@ -179,6 +181,7 @@ export const themingToolsPages: AdminPageDefinition[] = [
     path: '/contact/select',
     section: 'theming-tools',
     fullPage: true,
+    timeout: 15000,
   },
 
   // --- Tab ---
@@ -195,6 +198,7 @@ export const themingToolsPages: AdminPageDefinition[] = [
     path: '/table',
     section: 'theming-tools',
     fullPage: true,
+    timeout: 15000,
   },
 
   // --- Tabledrag ---

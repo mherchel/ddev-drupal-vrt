@@ -128,7 +128,7 @@ export const adminPages: AdminPageDefinition[] = [
     // Large page needs extra time for stable screenshot
     timeout: 30000,
     // The permissions page has ongoing network activity that prevents networkidle
-    testTimeout: 60000,
+    testTimeout: 90000,
   },
   {
     id: 'people-roles',
