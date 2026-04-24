@@ -71,7 +71,7 @@ function generateThemingToolsTests(pages: AdminPageDefinition[]) {
               await page.locator(pageDef.waitFor).waitFor();
             }
 
-            await page.waitForLoadState(pageDef.testTimeout ? 'load' : 'networkidle');
+            await page.waitForLoadState('load');
             await interaction.action(page);
 
             const mask = (pageDef.maskSelectors || []).map((s) => page.locator(s));
