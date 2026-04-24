@@ -60,6 +60,21 @@ export const adminPages: AdminPageDefinition[] = [
     section: 'structure',
   },
   {
+    id: 'structure-content-types-article',
+    path: '/admin/structure/types/manage/article',
+    section: 'structure',
+  },
+  {
+    id: 'structure-content-types-article-fields',
+    path: '/admin/structure/types/manage/article/fields',
+    section: 'structure',
+  },
+  {
+    id: 'structure-content-types-article-display',
+    path: '/admin/structure/types/manage/article/display',
+    section: 'structure',
+  },
+  {
     id: 'structure-block-layout',
     path: '/admin/structure/block',
     section: 'structure',
@@ -70,6 +85,11 @@ export const adminPages: AdminPageDefinition[] = [
     section: 'structure',
   },
   {
+    id: 'structure-views-content',
+    path: '/admin/structure/views/view/content',
+    section: 'structure',
+  },
+  {
     id: 'structure-taxonomy',
     path: '/admin/structure/taxonomy',
     section: 'structure',
@@ -77,6 +97,11 @@ export const adminPages: AdminPageDefinition[] = [
   {
     id: 'structure-menus',
     path: '/admin/structure/menu',
+    section: 'structure',
+  },
+  {
+    id: 'structure-menu-admin',
+    path: '/admin/structure/menu/manage/admin',
     section: 'structure',
   },
 
