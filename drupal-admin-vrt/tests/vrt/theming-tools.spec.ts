@@ -1,3 +1,4 @@
+// #ddev-generated
 import { test, expect } from '@playwright/test';
 import { themingToolsPages } from '../../page-definitions/theming-tools-pages.js';
 import type { AdminPageDefinition } from '../../page-definitions/admin-pages.js';

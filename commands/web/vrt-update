@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# #ddev-generated
 ## Description: Capture or update VRT baseline screenshots
 ## Usage: vrt-update [flags]
 ## Example: ddev vrt-update\nddev vrt-update --normal\nddev vrt-update --full\nddev vrt-update --project=narrow

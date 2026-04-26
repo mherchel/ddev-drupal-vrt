@@ -1,3 +1,4 @@
+// #ddev-generated
 import { test, expect } from '@playwright/test';
 import type { AdminPageDefinition } from '../../page-definitions/admin-pages.js';
 

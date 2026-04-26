@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# #ddev-generated
 ## Description: Run visual regression tests (compare against baselines)
 ## Usage: vrt [flags]
 ## Example: ddev vrt\nddev vrt --normal\nddev vrt --full\nddev vrt --no-bail\nddev vrt --project=narrow\nddev vrt tests/vrt/content.spec.ts

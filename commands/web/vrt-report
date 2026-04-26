@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# #ddev-generated
 ## Description: Show the VRT HTML diff report
 ## Usage: vrt-report
 ## Example: ddev vrt-report

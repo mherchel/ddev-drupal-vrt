@@ -1,3 +1,4 @@
+// #ddev-generated
 import type { AdminPageDefinition } from './admin-pages.js';
 
 /**
