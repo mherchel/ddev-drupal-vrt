@@ -110,6 +110,7 @@ export const adminPages: AdminPageDefinition[] = [
     path: '/admin/structure/menu/manage/admin',
     section: 'structure',
     fullPage: true,
+    timeout: 20000,
   },
 
   // --- Appearance ---
@@ -150,6 +151,7 @@ export const adminPages: AdminPageDefinition[] = [
     path: '/admin/config/content/formats/manage/basic_html',
     section: 'config',
     fullPage: true,
+    timeout: 20000,
   },
   {
     id: 'config-media-file-system',
