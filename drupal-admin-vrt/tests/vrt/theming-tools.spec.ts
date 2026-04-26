@@ -1,5 +1,6 @@
 // #ddev-generated
 import { test, expect } from '@playwright/test';
+import fs from 'fs';
 import { themingToolsPages } from '../../page-definitions/theming-tools-pages.js';
 import type { AdminPageDefinition } from '../../page-definitions/admin-pages.js';
 
@@ -46,6 +47,10 @@ function generateThemingToolsTests(pages: AdminPageDefinition[]) {
           mask,
           ...(pageDef.timeout ? { timeout: pageDef.timeout } : {}),
         });
+        const snapshotPath = testInfo.snapshotPath(`${pageDef.id}.png`);
+        if (fs.existsSync(snapshotPath)) {
+          await testInfo.attach('screenshot', { body: fs.readFileSync(snapshotPath), contentType: 'image/png' });
+        }
       });
 
       if (pageDef.interactions) {
@@ -85,6 +90,10 @@ function generateThemingToolsTests(pages: AdminPageDefinition[]) {
                 ...(pageDef.timeout ? { timeout: pageDef.timeout } : {}),
               }
             );
+            const snapshotPath = testInfo.snapshotPath(`${pageDef.id}--${interaction.label}.png`);
+            if (fs.existsSync(snapshotPath)) {
+              await testInfo.attach('screenshot', { body: fs.readFileSync(snapshotPath), contentType: 'image/png' });
+            }
           });
         }
       }

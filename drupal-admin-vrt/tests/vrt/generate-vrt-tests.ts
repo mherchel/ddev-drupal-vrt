@@ -1,5 +1,6 @@
 // #ddev-generated
 import { test, expect } from '@playwright/test';
+import fs from 'fs';
 import type { AdminPageDefinition } from '../../page-definitions/admin-pages.js';
 
 export function generateVrtTests(pages: AdminPageDefinition[]) {
@@ -31,6 +32,10 @@ export function generateVrtTests(pages: AdminPageDefinition[]) {
           mask,
           ...(pageDef.timeout ? { timeout: pageDef.timeout } : {}),
         });
+        const snapshotPath = testInfo.snapshotPath(`${pageDef.id}.png`);
+        if (fs.existsSync(snapshotPath)) {
+          await testInfo.attach('screenshot', { body: fs.readFileSync(snapshotPath), contentType: 'image/png' });
+        }
       });
 
       if (pageDef.interactions) {
@@ -65,6 +70,10 @@ export function generateVrtTests(pages: AdminPageDefinition[]) {
                 ...(pageDef.timeout ? { timeout: pageDef.timeout } : {}),
               }
             );
+            const snapshotPath = testInfo.snapshotPath(`${pageDef.id}--${interaction.label}.png`);
+            if (fs.existsSync(snapshotPath)) {
+              await testInfo.attach('screenshot', { body: fs.readFileSync(snapshotPath), contentType: 'image/png' });
+            }
           });
         }
       }
