@@ -190,11 +190,6 @@ export const adminPages: AdminPageDefinition[] = [
     section: 'reports',
   },
   {
-    id: 'reports-dblog',
-    path: '/admin/reports/dblog',
-    section: 'reports',
-  },
-  {
     id: 'reports-updates',
     path: '/admin/reports/updates',
     section: 'reports',
