@@ -188,18 +188,15 @@ export const adminPages: AdminPageDefinition[] = [
     id: 'reports-status',
     path: '/admin/reports/status',
     section: 'reports',
-    fullPage: true,
   },
   {
     id: 'reports-dblog',
     path: '/admin/reports/dblog',
     section: 'reports',
-    fullPage: true,
   },
   {
     id: 'reports-updates',
     path: '/admin/reports/updates',
     section: 'reports',
-    fullPage: true,
   },
 ];
