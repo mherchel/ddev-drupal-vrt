@@ -1,0 +1,5 @@
+/drupal-vrt/node_modules/
+/drupal-vrt/.auth/*.json
+# Dev-time copy of the user-facing config; the canonical version lives at
+# drupal-vrt/defaults/drupal-vrt.yaml.
+/drupal-vrt.yaml

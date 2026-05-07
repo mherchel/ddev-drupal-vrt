@@ -1,4 +1,4 @@
-name: ddev-drupal-admin-vrt
+name: ddev-drupal-vrt
 
 ddev_version_constraint: ">= v1.24.0"
 
@@ -14,20 +14,25 @@ project_files:
   - commands/web/vrt-update
   - commands/web/vrt-report
   - docker-compose.vrt-report.yaml
-  - drupal-admin-vrt
+  - drupal-vrt
 
 post_install_actions:
   - |
     mkdir -p ${DDEV_APPROOT}/__screenshots__
     grep -qxF 'test-results/' ${DDEV_APPROOT}/.gitignore 2>/dev/null || echo 'test-results/' >> ${DDEV_APPROOT}/.gitignore
     grep -qxF 'playwright-report/' ${DDEV_APPROOT}/.gitignore 2>/dev/null || echo 'playwright-report/' >> ${DDEV_APPROOT}/.gitignore
+    if [ ! -f "${DDEV_APPROOT}/.ddev/drupal-vrt.yaml" ]; then
+      cp "${DDEV_APPROOT}/.ddev/drupal-vrt/defaults/drupal-vrt.yaml" "${DDEV_APPROOT}/.ddev/drupal-vrt.yaml"
+      echo "Created .ddev/drupal-vrt.yaml from defaults — edit to customize which pages are tested."
+    fi
     echo ""
     echo "VRT add-on installed! Next steps:"
     echo "  1. ddev restart"
-    echo "  2. ddev exec -d /var/www/html/.ddev/drupal-admin-vrt npm install"
-    echo "  3. ddev exec -d /var/www/html/.ddev/drupal-admin-vrt npx playwright install --with-deps chromium"
+    echo "  2. ddev exec -d /var/www/html/.ddev/drupal-vrt npm install"
+    echo "  3. ddev exec -d /var/www/html/.ddev/drupal-vrt npx playwright install --with-deps chromium"
+    echo "  4. Edit .ddev/drupal-vrt.yaml to configure pages, then commit it."
     echo ""
 
 removal_actions:
-  - rm -rf .ddev/drupal-admin-vrt
+  - rm -rf .ddev/drupal-vrt
   - rm -f .ddev/docker-compose.vrt-report.yaml

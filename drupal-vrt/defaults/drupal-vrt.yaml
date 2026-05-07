@@ -1,0 +1,202 @@
+# #ddev-generated
+# Drupal VRT — default configuration.
+#
+# This file gets copied to .ddev/drupal-vrt.yaml on first run. It is YOUR
+# config from that point on — edit, commit, customize freely.
+#
+# Schema reference and full DSL are documented in defaults/drupal-vrt.example.yaml
+# in this add-on directory.
+
+version: 1
+
+defaults:
+  auth: admin
+  viewports: [narrow, mid, wide]
+  directions: [ltr]
+  fullPage: true
+  timeout: 5000
+
+modes:
+  normal:
+    viewports: [narrow, wide]
+    directions: [ltr]
+  full:
+    viewports: [narrow, mid, wide]
+    directions: [ltr, rtl]
+  default: normal
+
+bail: 5
+
+pages:
+  # ---------- Content ----------
+  - id: content-overview
+    path: /admin/content
+  - id: node-add-article
+    path: /node/add/article
+
+  # ---------- Structure ----------
+  - id: structure-overview
+    path: /admin/structure
+  - id: structure-content-types
+    path: /admin/structure/types
+  - id: structure-content-types-article
+    path: /admin/structure/types/manage/article
+  - id: structure-content-types-article-fields
+    path: /admin/structure/types/manage/article/fields
+  - id: structure-content-types-article-display
+    path: /admin/structure/types/manage/article/display
+  - id: structure-block-layout
+    path: /admin/structure/block
+  - id: structure-views
+    path: /admin/structure/views
+  - id: structure-views-content
+    path: /admin/structure/views/view/content
+  - id: structure-taxonomy
+    path: /admin/structure/taxonomy
+  - id: structure-menus
+    path: /admin/structure/menu
+  - id: structure-menu-admin
+    path: /admin/structure/menu/manage/admin
+    timeout: 20000
+
+  # ---------- Appearance ----------
+  - id: appearance-list
+    path: /admin/appearance
+
+  # ---------- Config ----------
+  - id: config-overview
+    path: /admin/config
+  - id: config-site-info
+    path: /admin/config/system/site-information
+  - id: config-performance
+    path: /admin/config/development/performance
+  - id: config-text-formats
+    path: /admin/config/content/formats
+  - id: config-text-formats-basic-html
+    path: /admin/config/content/formats/manage/basic_html
+    timeout: 20000
+  - id: config-media-file-system
+    path: /admin/config/media/file-system
+
+  # ---------- People ----------
+  - id: people-list
+    path: /admin/people
+  - id: people-permissions
+    path: /admin/people/permissions
+    timeout: 30000
+    testTimeout: 90000
+    fullPage: false
+  - id: people-roles
+    path: /admin/people/roles
+
+  # ---------- Reports ----------
+  - id: reports-status
+    path: /admin/reports/status
+    fullPage: false
+  - id: reports-updates
+    path: /admin/reports/updates
+    fullPage: false
+
+  # ---------- theming_tools contrib module ----------
+  # https://www.drupal.org/project/theming_tools
+  # Each entry corresponds to a submodule route. Tests auto-skip when the
+  # submodule is not enabled (skipIfStatus catches 403/404).
+  - id: tt-actionlink
+    path: /action-link
+    skipIfStatus: [403, 404]
+  - id: tt-autocomplete
+    path: /autocomplete
+    skipIfStatus: [403, 404]
+  - id: tt-buttons
+    path: /buttons
+    skipIfStatus: [403, 404]
+  - id: tt-buttons-disabled
+    path: /buttons/disabled
+    skipIfStatus: [403, 404]
+  - id: tt-checkboxradio
+    path: /contact/checkbox_radio
+    timeout: 10000
+    skipIfStatus: [403, 404]
+  - id: tt-dialog
+    path: /dialog
+    skipIfStatus: [403, 404]
+    interactions:
+      - label: modal-open
+        steps:
+          - click: 'a:has-text("Modal dialog")'
+          - waitFor: { selector: '#drupal-modal', state: 'visible' }
+  - id: tt-dropbutton
+    path: /dropbutton/dropbutton
+    skipIfStatus: [403, 404]
+  - id: tt-dropbutton-operations
+    path: /dropbutton/operations
+    skipIfStatus: [403, 404]
+  - id: tt-dropbutton-views
+    path: /dropbutton-views
+    skipIfStatus: [403, 404]
+  - id: tt-fieldcardinality
+    path: /contact/field_cardinality_test
+    timeout: 15000
+    skipIfStatus: [403, 404]
+  - id: tt-fieldset
+    path: /fieldset
+    timeout: 15000
+    skipIfStatus: [403, 404]
+  - id: tt-imagefile-file
+    path: /contact/imagefile_file
+    skipIfStatus: [403, 404]
+  - id: tt-imagefile-image
+    path: /contact/imagefile_image
+    skipIfStatus: [403, 404]
+  - id: tt-message-short
+    path: /message/short
+    skipIfStatus: [403, 404]
+  - id: tt-message-long
+    path: /message/long
+    skipIfStatus: [403, 404]
+  - id: tt-pager
+    path: /pager
+    skipIfStatus: [403, 404]
+  - id: tt-password
+    path: /password
+    skipIfStatus: [403, 404]
+  - id: tt-presuf-text
+    path: /contact/presuf_text
+    timeout: 15000
+    testTimeout: 60000
+    skipIfStatus: [403, 404]
+  - id: tt-presuf-number
+    path: /contact/presuf_number
+    timeout: 15000
+    testTimeout: 60000
+    skipIfStatus: [403, 404]
+  - id: tt-progress
+    path: /progress/all
+    maskSelectors:
+      - .ajax-progress
+    skipIfStatus: [403, 404]
+  - id: tt-select
+    path: /contact/select
+    timeout: 15000
+    skipIfStatus: [403, 404]
+  - id: tt-tabs
+    path: /tabs
+    skipIfStatus: [403, 404]
+  - id: tt-table
+    path: /table
+    timeout: 15000
+    skipIfStatus: [403, 404]
+  - id: tt-tabledrag
+    path: /tabledrag
+    skipIfStatus: [403, 404]
+  - id: tt-tabledrag-nested
+    path: /tabledrag/nested
+    skipIfStatus: [403, 404]
+  - id: tt-textarea
+    path: /contact/textarea
+    timeout: 15000
+    testTimeout: 60000
+    skipIfStatus: [403, 404]
+  - id: tt-textform
+    path: /contact/textform
+    skipIfStatus: [403, 404]

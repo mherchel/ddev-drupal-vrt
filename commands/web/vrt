@@ -2,61 +2,91 @@
 # #ddev-generated
 ## Description: Run visual regression tests (compare against baselines)
 ## Usage: vrt [flags]
-## Example: ddev vrt\nddev vrt --normal\nddev vrt --full\nddev vrt --no-bail\nddev vrt --project=narrow\nddev vrt tests/vrt/content.spec.ts
+## Example: ddev vrt\nddev vrt --normal\nddev vrt --full\nddev vrt --bail=10\nddev vrt --no-bail\nddev vrt --project=narrow-ltr\nddev vrt tests/vrt/all.spec.ts
 
-FAIL_THRESHOLD=5
+cd /var/www/html/.ddev/drupal-vrt
 
-# Parse our custom flags, pass the rest through to Playwright.
+# Resolve config-driven values from drupal-vrt.yaml.
+MODES_LIST=$(node bin/read-config.mjs modes) || exit $?
+DEFAULT_MODE=$(node bin/read-config.mjs default-mode) || exit $?
+BAIL=$(node bin/read-config.mjs bail) || exit $?
+
 MODE=""
-NO_BAIL=false
 PASSTHROUGH_ARGS=()
+HAS_PROJECT=false
+
 for arg in "$@"; do
   case "$arg" in
-    --normal)  MODE="normal" ;;
-    --full)    MODE="full" ;;
-    --no-bail) NO_BAIL=true ;;
-    *)         PASSTHROUGH_ARGS+=("$arg") ;;
+    --no-bail)
+      BAIL="false"
+      ;;
+    --bail=*)
+      BAIL="${arg#--bail=}"
+      ;;
+    --project=*|--project)
+      HAS_PROJECT=true
+      PASSTHROUGH_ARGS+=("$arg")
+      ;;
+    --*)
+      stripped="${arg#--}"
+      matched=false
+      for m in $MODES_LIST; do
+        if [ "$stripped" = "$m" ]; then
+          MODE="$m"
+          matched=true
+          break
+        fi
+      done
+      if [ "$matched" = false ]; then
+        PASSTHROUGH_ARGS+=("$arg")
+      fi
+      ;;
+    *)
+      PASSTHROUGH_ARGS+=("$arg")
+      ;;
   esac
 done
 
-# If no mode flag was given and no --project flag was passed, prompt.
-if [ -z "$MODE" ]; then
-  HAS_PROJECT=false
-  for arg in "${PASSTHROUGH_ARGS[@]}"; do
-    case "$arg" in --project=*|--project) HAS_PROJECT=true ;; esac
+# Prompt for a mode if none was selected and no --project was given.
+if [ -z "$MODE" ] && [ "$HAS_PROJECT" = false ]; then
+  echo "Select test mode:"
+  i=1
+  default_index=1
+  for m in $MODES_LIST; do
+    marker=""
+    if [ "$m" = "$DEFAULT_MODE" ]; then
+      marker=" (default)"
+      default_index=$i
+    fi
+    echo "  $i) $m$marker"
+    i=$((i+1))
   done
-
-  if [ "$HAS_PROJECT" = false ]; then
-    echo "Select test mode:"
-    echo "  1) Normal — narrow + wide viewports, LTR only (faster)"
-    echo "  2) Full   — all viewports and RTL"
-    read -r -p "Choice [1]: " CHOICE
-    case "$CHOICE" in
-      2) MODE="full" ;;
-      *) MODE="normal" ;;
-    esac
+  read -r -p "Choice [$default_index]: " CHOICE
+  CHOICE="${CHOICE:-$default_index}"
+  i=1
+  for m in $MODES_LIST; do
+    if [ "$i" = "$CHOICE" ]; then
+      MODE="$m"
+      break
+    fi
+    i=$((i+1))
+  done
+  if [ -z "$MODE" ]; then
+    echo "Invalid choice." >&2
+    exit 1
   fi
 fi
 
-cd /var/www/html/.ddev/drupal-admin-vrt
-
-# Build the Playwright command.
 CMD=(npx playwright test)
-if [ "$MODE" = "normal" ]; then
-  CMD+=(--project=narrow --project=wide)
-elif [ "$MODE" = "full" ]; then
-  # Run all projects (no filter needed — Playwright runs everything by default).
-  :
-fi
 
-# Stop early after N failures unless --no-bail is set.
-if [ "$NO_BAIL" = false ]; then
-  CMD+=(--max-failures="$FAIL_THRESHOLD")
+# Bail-on-failures: skip the flag entirely when disabled or zero.
+if [ "$BAIL" != "false" ] && [ "$BAIL" != "0" ]; then
+  CMD+=(--max-failures="$BAIL")
 fi
 
 CMD+=("${PASSTHROUGH_ARGS[@]}")
 
-"${CMD[@]}"
+VRT_MODE="$MODE" "${CMD[@]}"
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -ne 0 ]; then

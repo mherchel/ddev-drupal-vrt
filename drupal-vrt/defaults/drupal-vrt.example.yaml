@@ -1,0 +1,185 @@
+# Example .ddev/drupal-vrt.yaml
+#
+# Drop this file in .ddev/ and commit it with your project.
+# Defines pages to screenshot and compare against baselines.
+
+# ---------------------------------------------------------------------------
+# Global defaults — applied to every page unless overridden inline.
+# ---------------------------------------------------------------------------
+defaults:
+  # Authentication mode. One of:
+  #   admin      — log in as uid 1 via `drush uli`
+  #   anonymous  — no session
+  #   <role>     — log in as a user with this role (requires users.<role> below)
+  auth: anonymous
+
+  # Which viewports to capture. Subset of: narrow, mid, wide
+  viewports: [narrow, mid, wide]
+
+  # Which text directions to capture. Subset of: ltr, rtl
+  # A page can override this — e.g. to skip RTL for a page where it doesn't apply.
+  directions: [ltr]
+
+  # Take full-page screenshots by default.
+  fullPage: true
+
+  # Screenshot stability timeout (ms).
+  timeout: 5000
+
+  # Selectors masked on every page (in addition to per-page maskSelectors).
+  # Useful for site-wide dynamic content: timestamps, CSRF tokens, etc.
+  maskSelectors:
+    - '.local-time'
+    - '[data-drupal-form-token]'
+    - '#toolbar-administration time'
+
+  # CSS injected on every page before screenshotting.
+  # Layered on top of the bundled hide-dynamic.css.
+  css: |
+    .views-row .field--name-changed { visibility: hidden; }
+
+# ---------------------------------------------------------------------------
+# Test modes — preset combinations of viewports × directions.
+# Selected at run time: `ddev vrt --normal` or `ddev vrt --full`.
+# Pages still get filtered by their own `viewports`/`directions` lists,
+# so a mode is the upper bound, not an override.
+# ---------------------------------------------------------------------------
+modes:
+  normal:
+    viewports: [narrow, wide]
+    directions: [ltr]
+  full:
+    viewports: [narrow, mid, wide]
+    directions: [ltr]
+  # Mode used when neither --normal nor --full is passed.
+  default: normal
+
+# ---------------------------------------------------------------------------
+# Stop the run after this many test failures.
+# Set to 0 (or false) to run every test regardless of failures.
+# Overridable from the CLI: `ddev vrt --no-bail` or `ddev vrt --bail=10`.
+# ---------------------------------------------------------------------------
+bail: 5
+
+# ---------------------------------------------------------------------------
+# Optional: named user accounts for non-admin roles.
+# Referenced from `auth: <role>` on a page.
+# Values can be literals or ${ENV_VAR} references.
+# ---------------------------------------------------------------------------
+users:
+  editor:
+    username: ${VRT_EDITOR_USER}
+    password: ${VRT_EDITOR_PASS}
+  authenticated:
+    username: testuser
+    password: ${VRT_TESTUSER_PASS}
+
+# ---------------------------------------------------------------------------
+# Pages to test.
+# ---------------------------------------------------------------------------
+pages:
+  # --- Anonymous, front-end ---
+  - id: front
+    path: /
+    auth: anonymous
+
+  - id: contact-form
+    path: /contact
+    auth: anonymous
+    interactions:
+      - label: filled
+        steps:
+          - fill: { selector: '#edit-name', value: 'Jane' }
+          - fill: { selector: '#edit-mail', value: 'jane@example.com' }
+          - fill: { selector: '#edit-message-0-value', value: 'Hello world' }
+      - label: validation-errors
+        steps:
+          - click: '#edit-submit'
+          - waitFor: '.messages--error'
+
+  # --- Admin, simple ---
+  - id: content-overview
+    path: /admin/content
+
+  - id: structure-overview
+    path: /admin/structure
+
+  # --- Admin, viewport-specific ---
+  # Some layouts only matter at one size.
+  - id: toolbar-mobile
+    path: /admin
+    viewports: [narrow]
+
+  # --- LTR-only page ---
+  # Skip RTL for pages where direction doesn't meaningfully change layout
+  # (e.g. code editors, pages with non-localized content).
+  - id: config-performance
+    path: /admin/config/development/performance
+    directions: [ltr]
+
+  # --- Admin, large page needing custom timeouts ---
+  - id: people-permissions
+    path: /admin/people/permissions
+    timeout: 30000
+    testTimeout: 90000
+    fullPage: false
+
+  # --- Admin, with interactions ---
+  - id: node-add-article
+    path: /node/add/article
+    interactions:
+      - label: meta-sidebar-open
+        steps:
+          - click: 'button[data-drupal-selector="edit-meta"]'
+          - waitFor: '.layout-region-node-secondary.is-open'
+      - label: filled
+        steps:
+          - fill: { selector: '#edit-title-0-value', value: 'Test article title' }
+          - fill: { selector: '#edit-body-0-value', value: 'Body copy goes here.' }
+          - select: { selector: '#edit-status-value', value: '1' }
+          - check: '#edit-promote-value'
+
+  # --- Optional module: auto-skip if path 404s ---
+  - id: theming-tools-icons
+    path: /admin/appearance/theming-tools/icons
+    skipIfStatus: 404
+
+  # --- Per-page CSS to hide site-specific dynamic content ---
+  - id: dashboard
+    path: /admin/dashboard
+    css: |
+      .dashboard-counter,
+      .recent-activity time { visibility: hidden; }
+    waitFor: '.dashboard-loaded'
+
+  # --- Authenticated as editor role ---
+  - id: editor-dashboard
+    path: /user
+    auth: editor
+
+  # --- Mask page-specific dynamic content ---
+  - id: reports-status
+    path: /admin/reports/status
+    fullPage: false
+    maskSelectors:
+      - '.system-status-report__entry--php'      # PHP version row
+      - '.system-status-report__entry--database' # DB version row
+
+# ---------------------------------------------------------------------------
+# DSL reference — supported `steps:` primitives.
+# ---------------------------------------------------------------------------
+# click:    '<selector>'
+# click:    { selector: '<sel>', button: left|right|middle, count: 1 }
+# fill:     { selector: '<sel>', value: '<text>' }
+# press:    { selector: '<sel>', key: 'Enter' }     # selector optional
+# hover:    '<selector>'
+# select:   { selector: '<sel>', value: '<option>' }
+# check:    '<selector>'                            # checkbox/radio
+# uncheck:  '<selector>'
+# waitFor:  '<selector>'
+# waitFor:  { selector: '<sel>', state: visible|hidden|attached|detached }
+# scroll:   { selector: '<sel>' }                   # scroll into view
+# scroll:   { x: 0, y: 800 }                        # scroll window
+#
+# Anything more complex (loops, conditionals, page.evaluate) — keep using
+# the TypeScript page-definitions API as an escape hatch.

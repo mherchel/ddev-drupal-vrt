@@ -1,431 +1,241 @@
-# DDEV Drupal Admin VRT
+# DDEV Drupal VRT
 
-A DDEV add-on that provides visual regression testing for Drupal's `default_admin` theme using [Playwright](https://playwright.dev/). It screenshots 21 admin pages across 3 viewport sizes and compares them against baseline images, highlighting any visual differences. It also works with RTL layouts.
+A DDEV add-on for visual regression testing of any Drupal site using
+[Playwright](https://playwright.dev/). Define which pages to screenshot in a
+YAML config file, capture baselines on `main`, and compare against your feature
+branch. Supports multiple viewports, LTR + RTL, authenticated and anonymous
+sessions, and a small DSL for interactive states (form fills, modal opens,
+etc.).
 
-It also optionally tests pages from the [Theming Tools](https://www.drupal.org/project/theming_tools) contrib module when it's installed.
-
-## Commands reference
-
-| Command | Description | Options |
-|---|---|---|
-| `ddev vrt` | Run visual regression tests against baselines | `--normal` — narrow + wide, LTR only (skip prompt) |
-| | | `--full` — all viewports and RTL (skip prompt) |
-| | | `--no-bail` — don't stop after 5 failures |
-| | | `--project=<name>` — run a single viewport (`narrow`, `mid`, `wide`, `rtl-narrow`, `rtl-mid`, `rtl-wide`) |
-| | | `--debug` — run with Playwright inspector |
-| `ddev vrt-update` | Capture or update baseline screenshots | `--normal` — narrow + wide, LTR only (skip prompt) |
-| | | `--full` — all viewports and RTL (skip prompt) |
-| | | `--project=<name>` — update a single viewport |
-| `ddev vrt-report` | Serve the HTML diff report | — |
-
-## What it does
-
-This add-on:
-
-- **Screenshots admin pages** at three viewport widths (narrow 375px, mid 768px, wide 1280px) in both LTR and RTL
-- **Two test modes**: Normal (narrow + wide, LTR only) for fast feedback, or Full (all viewports + RTL)
-- **Compares screenshots** against baseline images using Playwright's built-in `toHaveScreenshot()`
-- **Reports visual differences** with an interactive HTML report showing side-by-side diffs
-- **Handles authentication** automatically via `drush uli` (no manual login needed)
-- **Runs inside the DDEV container** so screenshots are consistent across macOS, Linux, and Windows — no "works on my machine" issues
-
-## Prerequisites
-
-- [DDEV](https://ddev.com/) v1.24.0 or later
-- A Drupal project running in DDEV
-- An installed Drupal site with the database set up (run `ddev drush site:install` if starting fresh)
-- [Drush](https://www.drush.org/) installed (`ddev composer require drush/drush` if not already present)
-
-## Setting up the `default_admin` theme in Drupal for testing
-
-Run the following to install the `default_admin` theme, set it as both the default and admin theme, and clear the cache:
+## Quick start
 
 ```bash
-ddev drush theme:install default_admin -y
-ddev drush config:set system.theme default default_admin -y
-ddev drush config:set system.theme admin default_admin -y
-ddev drush config:set system.performance css.preprocess 0 -y
-ddev drush config:set system.performance js.preprocess 0 -y
-ddev drush cr
-```
-
-## Installation
-
-```bash
-# Install the add-on
-ddev add-on install https://github.com/mherchel/ddev-drupal-admin-vrt/tarball/main
-
-# Restart DDEV to pick up the new docker-compose config
+# Install
+ddev add-on install https://github.com/mherchel/ddev-drupal-vrt/tarball/main
 ddev restart
+ddev exec -d /var/www/html/.ddev/drupal-vrt npm install
+ddev exec -d /var/www/html/.ddev/drupal-vrt npx playwright install --with-deps chromium
 
-# Install Node.js dependencies and Chromium browser
-ddev exec -d /var/www/html/.ddev/drupal-admin-vrt npm install
-ddev exec -d /var/www/html/.ddev/drupal-admin-vrt npx playwright install --with-deps chromium
-```
-
-## Configuring which pages to test
-
-The list of admin pages to screenshot is defined in:
-
-```
-.ddev/drupal-admin-vrt/page-definitions/admin-pages.ts
-```
-
-Edit this file to add, remove, or modify pages. See [Adding pages](#adding-pages) for details and examples.
-
-## Usage
-
-### Capture baseline screenshots
-
-Run this on your reference branch (usually `main`) to establish the visual baseline:
-
-```bash
+# Capture baselines on main, then test your feature branch
 git checkout main
 ddev vrt-update
-```
-
-This creates PNG screenshots in the `__screenshots__/` directory at the project root, organized by viewport:
-
-```
-__screenshots__/
-├── narrow/    # 375px viewport
-├── mid/       # 768px viewport
-└── wide/      # 1280px viewport
-```
-
-### Compare against baselines
-
-Switch to your feature branch and run the comparison:
-
-```bash
-git checkout feature/my-theme-change
+git checkout my-feature
 ddev vrt
 ```
 
-You'll be prompted to choose a test mode:
+Configuration lives at `.ddev/drupal-vrt.yaml` (created automatically from
+sensible defaults on first install). Edit it, commit it.
 
-1. **Normal** (default) — runs narrow + wide viewports, LTR only. Faster for everyday development.
-2. **Full** — runs all viewports (narrow, mid, wide) and RTL variants.
+## Commands
 
-To skip the prompt, pass `--normal` or `--full`:
-
-```bash
-ddev vrt --normal    # Skip prompt, run normal mode
-ddev vrt --full      # Skip prompt, run full mode
-```
-
-The prompt is also skipped when you pass `--project` directly (e.g., `ddev vrt --project=narrow`).
-
-If all screenshots match, you'll see all tests pass. If there are visual differences, the tests will fail and Playwright will generate diff images.
-
-By default, the run stops early after 5 test failures to save time. Use `--no-bail` to run all tests regardless of failures.
-
-### View the diff report
-
-After a failed comparison, view the interactive HTML report:
-
-```bash
-ddev vrt-report
-```
-
-This serves the report at **https://\<projectname\>.ddev.site:9324**. The report shows:
-
-- Side-by-side comparison (expected vs actual)
-- A diff overlay highlighting changes
-- A slider to toggle between versions
-- Pass/fail status per test
-
-You can also view raw diff images directly in `test-results/` — for each failure Playwright writes three PNGs:
-
-- `*-expected.png` — the baseline
-- `*-actual.png` — what was captured
-- `*-diff.png` — differences highlighted
-
-### Update baselines for intentional changes
-
-If your feature branch intentionally changes the UI, update the baselines:
-
-```bash
-ddev vrt-update
-```
-
-Like `ddev vrt`, this prompts for normal/full mode. Use `--normal` or `--full` to skip the prompt.
-
-### Target specific viewports or sections
-
-```bash
-# Run only the narrow viewport
-ddev vrt --project=narrow
-
-# Run only content section tests
-ddev vrt tests/vrt/content.spec.ts
-
-# Combine: wide viewport, structure section only
-ddev vrt --project=wide tests/vrt/structure.spec.ts
-
-# Update baselines for a specific section
-ddev vrt-update tests/vrt/people.spec.ts
-```
-
-## Tested pages
-
-The add-on tests 21 admin pages grouped into 6 sections:
-
-| Section | Pages |
+| Command | Description |
 |---|---|
-| **Content** | Content overview, Add article, Add page |
-| **Structure** | Overview, Content types, Block layout, Views, Taxonomy, Menus |
-| **Appearance** | Theme list |
-| **Config** | Overview, Site information, Performance, Text formats, File system |
-| **People** | User list, Permissions, Roles |
-| **Reports** | Status report, Recent log messages, Available updates |
+| `ddev vrt` | Run VRT against baselines. Prompts for a mode unless `--<mode>` or `--project=<name>` is passed. |
+| `ddev vrt-update` | Capture or update baseline screenshots. |
+| `ddev vrt-report` | Serve the HTML diff report at `https://<project>.ddev.site:9324`. |
 
-Each page is screenshotted at 3 viewports = **63 total screenshots** per run.
+Common flags for `ddev vrt`:
 
-## Theming Tools integration
+- `--<mode>` — run a mode defined in `drupal-vrt.yaml` (e.g. `--normal`, `--full`).
+- `--project=<viewport>-<direction>` — single project, e.g. `--project=narrow-ltr`.
+- `--bail=N` — stop after N failures (default comes from `bail:` in yaml).
+- `--no-bail` — run every test regardless of failures.
+- `--debug` — open the Playwright inspector.
+- Any other flag passes straight through to `playwright test`.
 
-The add-on optionally tests pages from the [Theming Tools](https://www.drupal.org/project/theming_tools) contrib module — a suite of test submodules that each exercise a specific UI component (buttons, dialogs, tables, form widgets, etc.).
+## Configuration
 
-When `theming_tools` is installed and its submodules are enabled, the VRT suite automatically screenshots their test pages alongside the core admin pages. If `theming_tools` is not installed, these tests are silently skipped.
+Everything is driven by `.ddev/drupal-vrt.yaml`. The default looks roughly like:
 
-### Setup
+```yaml
+version: 1
 
-Install the module in your Drupal project:
+defaults:
+  auth: admin            # admin | anonymous | <named-role>
+  viewports: [narrow, mid, wide]
+  directions: [ltr]      # add rtl to capture RTL too
+  fullPage: true
+  timeout: 5000
 
-```bash
-ddev composer require 'drupal/theming_tools:1.0.x-dev@dev'
-ddev drush en theming_tools
+modes:
+  normal:
+    viewports: [narrow, wide]
+    directions: [ltr]
+  full:
+    viewports: [narrow, mid, wide]
+    directions: [ltr, rtl]
+  default: normal
+
+bail: 5
+
+pages:
+  - id: front
+    path: /
+    auth: anonymous
+
+  - id: content-overview
+    path: /admin/content
+
+  - id: node-add-article
+    path: /node/add/article
+    interactions:
+      - label: filled
+        steps:
+          - fill: { selector: '#edit-title-0-value', value: 'Test article' }
+          - fill: { selector: '#edit-body-0-value', value: 'Body copy' }
 ```
 
-Then enable whichever test submodules you want to screenshot:
+For the full schema with every option and DSL primitive documented inline, see
+[`drupal-vrt/defaults/drupal-vrt.example.yaml`](drupal-vrt/defaults/drupal-vrt.example.yaml).
 
-```bash
-# Enable a few specific ones
-ddev drush en button dialog table dropbutton textform
+### Authentication
 
-# Or enable all of them at once via the dashboard
-# Visit /admin/modules/theming-tools after enabling theming_tools
+Each page declares an `auth:` value:
+
+- **`admin`** (default) — logs in as uid 1 via `drush uli`. Override for CI by
+  setting `DRUPAL_ADMIN_USER` / `DRUPAL_ADMIN_PASS`, or by adding a
+  `users.admin: { username, password }` block.
+- **`anonymous`** — no login.
+- **`<role-name>`** — logs in via the standard form using credentials in
+  `users.<role-name>`. Use `${ENV_VAR}` refs for passwords:
+
+```yaml
+users:
+  editor:
+    username: editor
+    password: ${VRT_EDITOR_PASS}
 ```
 
-Some submodules (like `checkboxradio`, `textarea`, `textform`, `select`) depend on the `contact` module. Install it if needed:
+Roles not referenced by any page are skipped — you only need creds for the
+roles you actually test.
 
-```bash
-ddev composer require drupal/contact
-ddev drush en contact
+### Modes
+
+Modes are named presets of viewport × direction combinations. The default
+config ships with `normal` (narrow + wide, LTR) for fast iteration and `full`
+(all viewports, LTR + RTL) for thorough runs. Add your own:
+
+```yaml
+modes:
+  smoke:
+    viewports: [wide]
+    directions: [ltr]
+  default: smoke
 ```
 
-Once the submodules are enabled, capture baselines and run tests as usual:
+Then `ddev vrt --smoke` runs that profile.
 
-```bash
-ddev vrt-update
-ddev vrt
+### Per-page overrides
+
+Anything in `defaults:` can be overridden inline on a page:
+
+```yaml
+pages:
+  - id: people-permissions
+    path: /admin/people/permissions
+    timeout: 30000          # large page needs more stability time
+    testTimeout: 90000      # and more total time
+    fullPage: false
+
+  - id: code-editor
+    path: /admin/some/editor
+    directions: [ltr]       # skip RTL for this page
+
+  - id: optional-feature
+    path: /admin/maybe-not-installed
+    skipIfStatus: [403, 404]   # auto-skip when route is unavailable
 ```
 
-Tests for submodules that aren't enabled will be automatically skipped — you don't need to do anything special.
+### Interactions DSL
 
-### Tested theming_tools pages
+To screenshot a state that requires interaction (modal open, filled form),
+declare an `interactions:` list. Each interaction generates an additional
+screenshot named `<id>--<label>.png`. The supported step primitives:
 
-| Component | Pages |
-|---|---|
-| **Action Link** | Action link variants |
-| **Autocomplete** | Autocomplete widget |
-| **Buttons** | Button variants, disabled state |
-| **Checkbox & Radio** | Checkbox/radio contact form |
-| **Dialog** | Dialog page + modal interaction |
-| **Dropbutton** | Dropbutton, operations, Views |
-| **Field Cardinality** | Multi-value field widgets |
-| **Fieldset** | Fieldset component |
-| **Image & File** | File and image upload widgets |
-| **Message** | Short and long messages |
-| **Pager** | Pager component |
-| **Password** | Password confirm widget |
-| **Prefix/Suffix** | Text and number prefix/suffix |
-| **Progress** | Progress indicators |
-| **Select** | Select widgets |
-| **Tabs** | Local task tabs |
-| **Table** | Table component |
-| **Tabledrag** | Draggable tables, nested |
-| **Textarea** | Plain and formatted textareas |
-| **Text Form** | Text-like form items |
-
-The page definitions are in `.ddev/drupal-admin-vrt/page-definitions/theming-tools-pages.ts`.
-
-### Running only theming tools tests
-
-```bash
-ddev vrt tests/vrt/theming-tools.spec.ts
-ddev vrt-update tests/vrt/theming-tools.spec.ts
-```
-
-## Adding pages
-
-To add a new admin page to the test suite, edit `.ddev/drupal-admin-vrt/page-definitions/admin-pages.ts` and add an entry to the `adminPages` array:
-
-```typescript
-{
-  id: 'config-logging',           // Unique ID (used in screenshot filenames)
-  path: '/admin/config/development/logging',  // URL path
-  section: 'config',              // Section grouping
-},
-```
-
-Then capture its baseline:
-
-```bash
-ddev vrt-update
-```
-
-### Page definition options
-
-| Field | Required | Description |
+| Step | Form | Notes |
 |---|---|---|
-| `id` | Yes | Unique identifier for screenshot filenames |
-| `path` | Yes | URL path relative to the site root |
-| `section` | Yes | Grouping: `content`, `structure`, `appearance`, `config`, `people`, or `reports` |
-| `fullPage` | No | Capture the full scrollable page instead of just the viewport |
-| `waitFor` | No | CSS selector to wait for before taking the screenshot |
-| `maskSelectors` | No | Array of CSS selectors to mask (hide) in the screenshot |
-| `timeout` | No | Custom timeout in ms for screenshot stability check (default: 5000) |
-| `interactions` | No | Array of actions to perform before taking additional screenshots |
+| `click` | `'<sel>'` or `{ selector, button?, count? }` | |
+| `fill` | `{ selector, value }` | |
+| `press` | `{ selector?, key }` | Without selector, presses on the page |
+| `hover` | `'<sel>'` | |
+| `select` | `{ selector, value }` | `<select>` elements |
+| `check` / `uncheck` | `'<sel>'` | Checkboxes/radios |
+| `waitFor` | `'<sel>'` or `{ selector, state? }` | states: visible / hidden / attached / detached |
+| `scroll` | `{ selector }` or `{ x, y }` | |
 
-### Adding interactive states
-
-To screenshot a page after an interaction (opening a modal, clicking a button, etc.), use the `interactions` field:
-
-```typescript
-{
-  id: 'structure-block-layout',
-  path: '/admin/structure/block',
-  section: 'structure',
-  interactions: [
-    {
-      label: 'place-block-modal',    // Used in screenshot filename
-      action: async (page) => {
-        await page.getByRole('link', { name: 'Place block' }).first().click();
-        await page.locator('#drupal-modal').waitFor({ state: 'visible' });
-        await page.waitForTimeout(300);  // Let animation settle
-      },
-    },
-  ],
-}
-```
-
-Each interaction generates an additional screenshot named `<id>--<label>.png`.
+Anything more complex than the DSL covers — open an issue.
 
 ## How it works
 
-1. **Authentication**: Before any tests run, the `auth-setup` project runs `drush uli` inside the container to get a one-time login URL. It navigates to that URL and saves the authenticated session cookies. All subsequent tests reuse this session.
-
-2. **Viewport projects**: Playwright runs three projects in parallel (`narrow`, `mid`, `wide`), each with a different viewport size. All three depend on `auth-setup` completing first.
-
-3. **Screenshot comparison**: Each test navigates to an admin page, waits for the page to load, and calls `toHaveScreenshot()`. Playwright takes two screenshots 100ms apart to ensure stability, then compares against the baseline using pixel diffing.
-
-4. **Dynamic content handling**: A global CSS stylesheet (`fixtures/hide-dynamic.css`) hides elements that change between runs (timestamps, CSRF tokens, etc.) to prevent false positives.
+1. On the first invocation per session, an `auth-setup` project logs in for
+   each role referenced by any page and stashes session state in
+   `.auth/<role>.json`.
+2. Each test navigates to the configured `path`, applies optional CSS
+   overrides, optionally injects `dir="rtl"` for RTL projects, runs
+   interaction steps if any, and calls `toHaveScreenshot()` to compare.
+3. A bundled stylesheet (`fixtures/hide-dynamic.css`) hides timestamps, CSRF
+   tokens, and other content that changes between runs.
 
 ## Project structure
 
 ```
 .ddev/
 ├── commands/web/
-│   ├── vrt              # ddev vrt command
-│   ├── vrt-update       # ddev vrt-update command
-│   └── vrt-report       # ddev vrt-report command
-├── docker-compose.vrt-report.yaml   # Exposes port 9324 for the report
-└── drupal-admin-vrt/
-    ├── playwright.config.ts         # Playwright configuration
-    ├── package.json
+│   ├── vrt
+│   ├── vrt-update
+│   └── vrt-report
+├── docker-compose.vrt-report.yaml
+├── drupal-vrt.yaml          ← user config (commit this)
+└── drupal-vrt/
+    ├── playwright.config.ts
     ├── fixtures/
-    │   ├── auth.setup.ts            # Automatic admin login
-    │   └── hide-dynamic.css         # Hides timestamps, tokens, etc.
-    ├── page-definitions/
-    │   ├── admin-pages.ts           # Central registry of admin pages to test
-    │   └── theming-tools-pages.ts   # Theming Tools module pages (optional)
-    └── tests/vrt/
-        ├── generate-vrt-tests.ts    # Test generator (shared logic)
-        ├── content.spec.ts          # Content section tests
-        ├── structure.spec.ts        # Structure section tests
-        ├── appearance.spec.ts       # Appearance section tests
-        ├── config.spec.ts           # Config section tests
-        ├── people.spec.ts           # People section tests
-        ├── reports.spec.ts          # Reports section tests
-        └── theming-tools.spec.ts   # Theming Tools tests (auto-skipped if not installed)
+    │   ├── auth.setup.ts
+    │   └── hide-dynamic.css
+    ├── src/
+    │   ├── config/          ← yaml loader
+    │   └── dsl/             ← step interpreter
+    ├── tests/vrt/
+    │   ├── all.spec.ts      ← single generated spec
+    │   └── generate-vrt-tests.ts
+    └── defaults/
+        ├── drupal-vrt.yaml          ← shipped default config
+        └── drupal-vrt.example.yaml  ← schema + DSL reference
 ```
 
-Baselines and test output live in the project root:
+Baselines and test output land in the project root:
 
 ```
 project-root/
-├── __screenshots__/     # Baseline PNGs
-└── test-results/        # Diff output (gitignored)
+├── __screenshots__/    # baseline PNGs
+└── test-results/       # diff output (gitignored)
 ```
 
-## Configuration
+## Troubleshooting
 
-### Screenshot thresholds
+**"drush uli was not found" or login fails** — Drupal isn't installed yet. Run
+`ddev drush site:install` first.
 
-The default comparison settings in `playwright.config.ts`:
+**Tests fail on first run** — capture baselines first with `ddev vrt-update`.
 
-- **`maxDiffPixelRatio: 0.01`** — allows up to 1% of pixels to differ before failing
-- **`threshold: 0.2`** — per-pixel color sensitivity (0 = exact match, 1 = any color)
-- **`animations: 'disabled'`** — disables CSS animations for stable screenshots
-- **`caret: 'hide'`** — hides the text cursor
+**Flaky pages with dynamic content** — add the unstable selector to
+`maskSelectors:` (per-page or in `defaults:`), or to the bundled
+`fixtures/hide-dynamic.css`. Or bump `timeout:` on the page if the issue is
+stability rather than dynamic data.
 
-To adjust these, edit `.ddev/drupal-admin-vrt/playwright.config.ts`.
+**`drupal-vrt.yaml not found`** — copy from defaults:
+`cp .ddev/drupal-vrt/defaults/drupal-vrt.yaml .ddev/drupal-vrt.yaml`.
 
-### Hiding dynamic content
+**Port 9324 not accessible for the report** — `ddev restart` to load the
+docker-compose port mapping.
 
-To add more elements that should be hidden during screenshots (to prevent false positives), edit `.ddev/drupal-admin-vrt/fixtures/hide-dynamic.css`:
+## CI
 
-```css
-/* Example: hide a widget that shows random content */
-.my-dynamic-widget {
-  visibility: hidden !important;
-}
-```
-
-### CI usage
-
-For CI environments where `drush uli` may not be available, set environment variables for form-based login:
+Set form-login credentials in env (skips the `drush uli` path):
 
 ```bash
 DRUPAL_ADMIN_USER=admin
 DRUPAL_ADMIN_PASS=admin
 ```
 
-The `BASE_URL` environment variable can override the default `https://localhost` if the Drupal site is at a different address in CI.
-
-## Troubleshooting
-
-### "Command uli was not found" or "Drush was unable to query the database"
-
-Drupal is not installed. Run `ddev drush site:install` (or your project's site install command) before running VRT tests.
-
-### Tests fail on first run after installation
-
-You need to capture baselines before running comparisons. Run `ddev vrt-update` first.
-
-### Flaky failures on pages with dynamic content
-
-Some pages (like the status report) contain content that changes between runs. Options:
-
-1. **Add selectors to `hide-dynamic.css`** to hide the changing elements
-2. **Add `maskSelectors`** to the specific page definition in `admin-pages.ts`
-3. **Increase `maxDiffPixelRatio`** in the config if small differences are acceptable
-
-### Screenshot stability timeout
-
-Large pages (like Permissions) may need more time for Playwright to confirm the screenshot is stable. Add a `timeout` to the page definition:
-
-```typescript
-{
-  id: 'people-permissions',
-  path: '/admin/people/permissions',
-  section: 'people',
-  fullPage: true,
-  timeout: 30000,
-},
-```
-
-### Port 9324 not accessible for report
-
-Run `ddev restart` to ensure the docker-compose port mapping is loaded, then try `ddev vrt-report` again.
+`BASE_URL` overrides the default `https://localhost` if the site lives
+elsewhere in CI.
