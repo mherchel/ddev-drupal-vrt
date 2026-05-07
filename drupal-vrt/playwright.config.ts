@@ -11,7 +11,7 @@ const BASE_URL = process.env.BASE_URL || 'https://localhost';
 const VIEWPORT_SIZES: Record<ViewportName, { width: number; height: number }> = {
   narrow: { width: 375, height: 812 },
   mid: { width: 768, height: 1024 },
-  wide: { width: 1280, height: 900 },
+  wide: { width: 1600, height: 900 },
 };
 
 const config = loadConfig();
