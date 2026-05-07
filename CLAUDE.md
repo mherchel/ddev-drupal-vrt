@@ -98,6 +98,11 @@ ddev add-on install /path/to/ddev-drupal-vrt
 - The loader's `resolveUserCredentials()` is **lazy**: don't call it for roles
   that aren't referenced by any page (it would throw on missing env vars even
   when the role isn't used).
+- **Never leave `drupal-vrt/node_modules/` in the source tree before
+  `ddev add-on install /local/path`**. DDEV recursively copies the directory
+  and crashes on symlinks inside `node_modules/.bin/`. Run
+  `rm -rf drupal-vrt/node_modules` before any local-path install. Tarball
+  installs from GitHub are unaffected (git doesn't track node_modules).
 
 ## Publishing
 
