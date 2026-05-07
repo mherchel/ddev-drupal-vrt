@@ -70,8 +70,8 @@ export default defineConfig({
 
   expect: {
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.01,
-      threshold: 0.2,
+      // maxDiffPixelRatio and threshold are passed per-test from yaml
+      // (drupal-vrt.yaml's `defaults:` and per-page overrides).
       animations: 'disabled',
       caret: 'hide',
       stylePath: path.join(here, 'fixtures/hide-dynamic.css'),

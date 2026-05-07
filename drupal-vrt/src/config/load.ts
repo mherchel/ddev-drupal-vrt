@@ -12,13 +12,15 @@ import {
   type VrtConfig,
 } from './schema.js';
 
-const HARDCODED_DEFAULTS: Required<Pick<Defaults, 'auth' | 'viewports' | 'directions' | 'fullPage' | 'timeout' | 'maskSelectors'>> = {
+const HARDCODED_DEFAULTS: Required<Pick<Defaults, 'auth' | 'viewports' | 'directions' | 'fullPage' | 'timeout' | 'maskSelectors' | 'maxDiffPixelRatio' | 'threshold'>> = {
   auth: 'admin',
   viewports: ['narrow', 'mid', 'wide'],
   directions: ['ltr'],
   fullPage: true,
   timeout: 5000,
   maskSelectors: [],
+  maxDiffPixelRatio: 0.01,
+  threshold: 0.2,
 };
 
 const HARDCODED_MODES: Record<string, Mode> = {
@@ -149,6 +151,8 @@ function resolvePage(
     maskSelectors: [...defaults.maskSelectors, ...(p.maskSelectors ?? [])],
     css: p.css ?? defaults.css,
     skipIfStatus: p.skipIfStatus,
+    maxDiffPixelRatio: p.maxDiffPixelRatio ?? defaults.maxDiffPixelRatio,
+    threshold: p.threshold ?? defaults.threshold,
     interactions: p.interactions,
   };
 }

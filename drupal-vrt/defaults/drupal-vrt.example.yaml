@@ -38,6 +38,17 @@ defaults:
   css: |
     .views-row .field--name-changed { visibility: hidden; }
 
+  # Screenshot diff thresholds (per-page overridable).
+  #
+  #   maxDiffPixelRatio — fraction of pixels allowed to differ before failing.
+  #     0.01 = 1% of pixels. Lower it (e.g. 0.001) to catch smaller layout
+  #     shifts; raise it for known-noisy pages.
+  #   threshold        — per-pixel color sensitivity. 0 = exact match (anti-
+  #     aliasing causes false positives), 1 = anything matches. 0.2 is a
+  #     livable middle.
+  maxDiffPixelRatio: 0.01
+  threshold: 0.2
+
 # ---------------------------------------------------------------------------
 # Test modes — preset combinations of viewports × directions.
 # Selected at run time: `ddev vrt --normal` or `ddev vrt --full`.
@@ -166,6 +177,14 @@ pages:
   - id: editor-dashboard
     path: /user
     auth: editor
+
+  # --- Per-page diff thresholds (override yaml defaults) ---
+  - id: hero-heavy-landing
+    path: /landing
+    # Anti-aliased icons and a noisy hero — loosen the per-pixel tolerance
+    # but keep overall pixel budget tight.
+    threshold: 0.4
+    maxDiffPixelRatio: 0.005
 
   # --- Mask page-specific dynamic content ---
   - id: reports-status

@@ -228,6 +228,26 @@ containers can cause intermittent timeouts when multiple workers hit the site
 at once. Lower `workers:` in `drupal-vrt.yaml` (default 2). Setting it to `1`
 serializes the run.
 
+**Tests passing on changes I expected to catch** — adjust the diff thresholds.
+A test fails only when **more than `maxDiffPixelRatio` of pixels** differ from
+baseline (default 1%), where "differ" means color delta exceeds `threshold`
+(default 0.2). To tighten globally, set in `defaults:`:
+
+```yaml
+defaults:
+  maxDiffPixelRatio: 0.005   # fail at 0.5% of pixels different
+  threshold: 0.15            # tighter per-pixel sensitivity
+```
+
+Or override per-page when one is unusually noisy:
+
+```yaml
+pages:
+  - id: hero-heavy-landing
+    path: /landing
+    threshold: 0.4
+```
+
 **`drupal-vrt.yaml not found`** — copy from defaults:
 `cp .ddev/drupal-vrt/defaults/drupal-vrt.yaml .ddev/drupal-vrt.yaml`.
 

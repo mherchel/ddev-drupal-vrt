@@ -1,16 +1,8 @@
 // #ddev-generated
 import { test as setup, expect, type Page } from '@playwright/test';
 import { execSync } from 'child_process';
-import path from 'path';
-import url from 'url';
 import { loadConfig, resolveUserCredentials } from '../src/config/load.js';
-
-const here = path.dirname(url.fileURLToPath(import.meta.url));
-const authDir = path.join(here, '..', '.auth');
-
-export function authStatePath(role: string): string {
-  return path.join(authDir, `${role}.json`);
-}
+import { authStatePath } from '../src/paths.js';
 
 const config = loadConfig();
 

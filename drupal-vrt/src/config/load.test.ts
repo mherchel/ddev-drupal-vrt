@@ -105,6 +105,58 @@ pages:
     expect(c.defaultMode).toBe('only');
   });
 
+  it('defaults maxDiffPixelRatio and threshold; per-page overrides win', () => {
+    const c = loadConfig({
+      source: `
+version: 1
+defaults:
+  maxDiffPixelRatio: 0.005
+  threshold: 0.15
+pages:
+  - id: a
+    path: /a
+  - id: b
+    path: /b
+    maxDiffPixelRatio: 0.001
+    threshold: 0
+`,
+    });
+    expect(c.pages[0].maxDiffPixelRatio).toBe(0.005);
+    expect(c.pages[0].threshold).toBe(0.15);
+    expect(c.pages[1].maxDiffPixelRatio).toBe(0.001);
+    expect(c.pages[1].threshold).toBe(0);
+
+    // Hardcoded fallbacks when yaml omits them.
+    const c2 = loadConfig({ source: minimal });
+    expect(c2.pages[0].maxDiffPixelRatio).toBe(0.01);
+    expect(c2.pages[0].threshold).toBe(0.2);
+  });
+
+  it('rejects out-of-range maxDiffPixelRatio or threshold', () => {
+    expect(() =>
+      loadConfig({
+        source: `
+version: 1
+pages:
+  - id: a
+    path: /a
+    maxDiffPixelRatio: 1.5
+`,
+      }),
+    ).toThrow(ConfigError);
+    expect(() =>
+      loadConfig({
+        source: `
+version: 1
+pages:
+  - id: a
+    path: /a
+    threshold: -0.1
+`,
+      }),
+    ).toThrow(ConfigError);
+  });
+
   it('defaults workers to 2 when omitted; respects an override', () => {
     expect(loadConfig({ source: minimal }).workers).toBe(2);
     expect(

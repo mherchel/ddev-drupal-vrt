@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 import fs from 'fs';
 import { runSteps } from '../../src/dsl/run-steps.js';
 import type { Direction, ResolvedPage, ViewportName } from '../../src/config/schema.js';
-import { authStatePath } from '../../fixtures/auth.setup.js';
+import { authStatePath } from '../../src/paths.js';
 
 interface ProjectMeta {
   viewport: ViewportName;
@@ -136,6 +136,8 @@ async function screenshot(
   await expect(page).toHaveScreenshot(filename, {
     fullPage: pageDef.fullPage,
     mask,
+    maxDiffPixelRatio: pageDef.maxDiffPixelRatio,
+    threshold: pageDef.threshold,
     ...(pageDef.timeout ? { timeout: pageDef.timeout } : {}),
   });
   const snapshotPath = testInfo.snapshotPath(filename);

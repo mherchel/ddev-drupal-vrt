@@ -89,6 +89,8 @@ const Defaults = z
     timeout: z.number().int().positive().optional(),
     maskSelectors: z.array(z.string()).optional(),
     css: z.string().optional(),
+    maxDiffPixelRatio: z.number().min(0).max(1).optional(),
+    threshold: z.number().min(0).max(1).optional(),
   })
   .strict();
 export type Defaults = z.infer<typeof Defaults>;
@@ -109,6 +111,8 @@ export const PageInput = z
     skipIfStatus: z
       .union([z.number().int(), z.array(z.number().int()).min(1)])
       .optional(),
+    maxDiffPixelRatio: z.number().min(0).max(1).optional(),
+    threshold: z.number().min(0).max(1).optional(),
     interactions: z.array(Interaction).optional(),
   })
   .strict();
@@ -156,6 +160,8 @@ export interface ResolvedPage {
   maskSelectors: string[];
   css?: string;
   skipIfStatus?: number | number[];
+  maxDiffPixelRatio: number;
+  threshold: number;
   interactions?: Interaction[];
 }
 
