@@ -62,6 +62,16 @@ modes:
 bail: 5
 
 # ---------------------------------------------------------------------------
+# Number of parallel Playwright workers.
+# Each worker drives one Chromium instance against the same Drupal site.
+# - Lower (1–2): resource-constrained DDEV container, heavy theme, or flaky
+#   timing under load. Default is 2 because the original default_admin VRT
+#   suite needed it to avoid intermittent failures.
+# - Raise: fast site on a beefy host — runs finish proportionally faster.
+# ---------------------------------------------------------------------------
+workers: 2
+
+# ---------------------------------------------------------------------------
 # Optional: named user accounts for non-admin roles.
 # Referenced from `auth: <role>` on a page.
 # Values can be literals or ${ENV_VAR} references.

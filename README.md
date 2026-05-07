@@ -67,6 +67,7 @@ modes:
   default: normal
 
 bail: 5
+workers: 2             # parallel test runners — lower for heavy sites/containers
 
 pages:
   - id: front
@@ -221,6 +222,11 @@ project-root/
 `maskSelectors:` (per-page or in `defaults:`), or to the bundled
 `fixtures/hide-dynamic.css`. Or bump `timeout:` on the page if the issue is
 stability rather than dynamic data.
+
+**Flaky timing under parallel load** — heavy themes or resource-starved
+containers can cause intermittent timeouts when multiple workers hit the site
+at once. Lower `workers:` in `drupal-vrt.yaml` (default 2). Setting it to `1`
+serializes the run.
 
 **`drupal-vrt.yaml not found`** — copy from defaults:
 `cp .ddev/drupal-vrt/defaults/drupal-vrt.yaml .ddev/drupal-vrt.yaml`.

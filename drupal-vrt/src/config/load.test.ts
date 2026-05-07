@@ -105,6 +105,35 @@ pages:
     expect(c.defaultMode).toBe('only');
   });
 
+  it('defaults workers to 2 when omitted; respects an override', () => {
+    expect(loadConfig({ source: minimal }).workers).toBe(2);
+    expect(
+      loadConfig({
+        source: `
+version: 1
+workers: 4
+pages:
+  - id: a
+    path: /a
+`,
+      }).workers,
+    ).toBe(4);
+  });
+
+  it('rejects a non-positive workers value', () => {
+    expect(() =>
+      loadConfig({
+        source: `
+version: 1
+workers: 0
+pages:
+  - id: a
+    path: /a
+`,
+      }),
+    ).toThrow(ConfigError);
+  });
+
   it('parses bail variants: number, false, true, omitted', () => {
     const make = (bail: string | undefined) =>
       loadConfig({

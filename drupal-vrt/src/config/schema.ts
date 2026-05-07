@@ -135,6 +135,7 @@ export const VrtConfigInput = z
     version: z.literal(1),
     defaults: Defaults.optional(),
     bail: z.union([z.number().int().min(0), z.boolean()]).optional(),
+    workers: z.number().int().positive().optional(),
     modes: z.record(z.any()).optional(),
     users: z.record(User).optional(),
     pages: z.array(PageInput).min(1),
@@ -161,6 +162,7 @@ export interface ResolvedPage {
 export interface VrtConfig {
   version: 1;
   bail: number | false;
+  workers: number;
   modes: Record<string, Mode>;
   defaultMode: string;
   users: Record<string, User>;

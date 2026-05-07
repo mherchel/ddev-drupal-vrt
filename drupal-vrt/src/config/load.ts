@@ -64,10 +64,12 @@ export function loadConfig(opts: LoadOptions = {}): VrtConfig {
   assertUniqueIds(pages);
 
   const bail = input.bail === undefined ? 5 : input.bail === true ? 5 : input.bail;
+  const workers = input.workers ?? 2;
 
   return {
     version: 1,
     bail: bail === false ? false : (bail as number),
+    workers,
     modes,
     defaultMode,
     users: input.users ?? {},

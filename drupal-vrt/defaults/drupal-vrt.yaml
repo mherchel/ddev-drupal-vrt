@@ -33,6 +33,11 @@ modes:
 
 bail: 5
 
+# Number of parallel test runners. Lower if the DDEV web container struggles
+# under load (heavy themes can cause flaky timing); raise on a fast site for
+# quicker runs.
+workers: 2
+
 pages:
   # ---------- Content ----------
   - id: home
