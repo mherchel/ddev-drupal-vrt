@@ -37,6 +37,11 @@ authenticated and anonymous sessions, and a small DSL for interactive states.
   of the original admin-pages + theming-tools-pages content.
 - `drupal-vrt/defaults/drupal-vrt.example.yaml` — schema + DSL reference, fully
   commented. Used as documentation, not loaded.
+- `drupal-vrt/defaults/drupal-vrt.css` — starter project-level stylesheet,
+  copied to `.ddev/drupal-vrt.css` on first install. Layered with the bundled
+  `fixtures/hide-dynamic.css` via `expect.toHaveScreenshot.stylePath` (an
+  array). The user file is optional; playwright.config detects via
+  `fs.existsSync` and only includes it if present.
 - `drupal-vrt/bin/read-config.mjs` — tiny shell helper. Bash commands invoke it
   to read `bail`, `default-mode`, `modes` from yaml without needing a yaml
   parser in shell. Parses with `js-yaml` directly (does NOT import the TS
@@ -98,6 +103,11 @@ ddev add-on install /path/to/ddev-drupal-vrt
 - The loader's `resolveUserCredentials()` is **lazy**: don't call it for roles
   that aren't referenced by any page (it would throw on missing env vars even
   when the role isn't used).
+- `vrt-update` passes `--update-snapshots=all`, not the bare flag. Playwright
+  1.50+ defaults the bare flag to `changed` mode, which only rewrites snapshots
+  whose new screenshot fails comparison. Sub-threshold diffs (e.g. a newly
+  added CSS hide-rule that hides only a small element) would silently leave
+  baselines stale.
 - **Never leave `drupal-vrt/node_modules/` in the source tree before
   `ddev add-on install /local/path`**. DDEV recursively copies the directory
   and crashes on symlinks inside `node_modules/.bin/`. Run

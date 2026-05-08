@@ -1,5 +1,6 @@
 // #ddev-generated
 import { defineConfig, devices, type Project } from '@playwright/test';
+import fs from 'fs';
 import path from 'path';
 import url from 'url';
 import { loadConfig } from './src/config/load.js';
@@ -7,6 +8,15 @@ import type { ViewportName } from './src/config/schema.js';
 
 const here = path.dirname(url.fileURLToPath(import.meta.url));
 const BASE_URL = process.env.BASE_URL || 'https://localhost';
+
+// Stylesheets injected before each screenshot.
+//   1. Bundled hide-dynamic.css (add-on owned, overwritten on update).
+//   2. Project-level .ddev/drupal-vrt.css (user owned, optional).
+const bundledStyles = path.join(here, 'fixtures/hide-dynamic.css');
+const projectStyles = path.resolve(here, '..', 'drupal-vrt.css');
+const stylePath = fs.existsSync(projectStyles)
+  ? [bundledStyles, projectStyles]
+  : bundledStyles;
 
 const VIEWPORT_SIZES: Record<ViewportName, { width: number; height: number }> = {
   narrow: { width: 375, height: 812 },
@@ -74,7 +84,7 @@ export default defineConfig({
       // (drupal-vrt.yaml's `defaults:` and per-page overrides).
       animations: 'disabled',
       caret: 'hide',
-      stylePath: path.join(here, 'fixtures/hide-dynamic.css'),
+      stylePath,
     },
   },
 

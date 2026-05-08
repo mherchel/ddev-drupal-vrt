@@ -1,0 +1,21 @@
+/*
+ * #ddev-generated-on-first-install
+ *
+ * Project-level VRT stylesheet. Layered on top of the add-on's bundled
+ * hide-dynamic.css before each screenshot. Edit freely; commit to your
+ * project repo.
+ *
+ * Use this for site-specific dynamic content that the bundled defaults
+ * don't catch — e.g. uptime widgets, "last updated" timestamps, random
+ * blog rotators, third-party embeds with shifting content.
+ *
+ * For one-off rules tied to a specific page, prefer the per-page `css:`
+ * field in drupal-vrt.yaml instead.
+ *
+ * Examples:
+ *
+ *   .views-row .field--name-changed { visibility: hidden; }
+ *   .uptime-status,
+ *   #live-chat-widget { display: none !important; }
+ *   .news-rotator .views-row:nth-child(n+2) { visibility: hidden; }
+ */

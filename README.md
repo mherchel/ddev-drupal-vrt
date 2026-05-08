@@ -89,6 +89,22 @@ pages:
 For the full schema with every option and DSL primitive documented inline, see
 [`drupal-vrt/defaults/drupal-vrt.example.yaml`](drupal-vrt/defaults/drupal-vrt.example.yaml).
 
+### Hiding dynamic content
+
+Three layers cooperate, applied in this order before each screenshot:
+
+1. **`drupal-vrt/fixtures/hide-dynamic.css`** — bundled with the add-on,
+   covers the common Drupal cases (timestamps, tokens, toolbar clocks).
+   Overwritten on every add-on update.
+2. **`.ddev/drupal-vrt.css`** — project-owned. Created on first install
+   from a starter template; commit it. Use for site-specific dynamic
+   content (uptime widgets, "last updated" timestamps, news rotators).
+3. **`defaults.css` and per-page `css` in `drupal-vrt.yaml`** — inline
+   CSS strings for global or page-specific tweaks.
+
+Each layer's rules cascade on top of the previous, so per-page rules win
+over project rules win over bundled defaults.
+
 ### Authentication
 
 Each page declares an `auth:` value:
@@ -187,6 +203,7 @@ Anything more complex than the DSL covers — open an issue.
 │   └── vrt-report
 ├── docker-compose.vrt-report.yaml
 ├── drupal-vrt.yaml          ← user config (commit this)
+├── drupal-vrt.css           ← user CSS for hiding dynamic content (commit this)
 └── drupal-vrt/
     ├── playwright.config.ts
     ├── fixtures/

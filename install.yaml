@@ -25,6 +25,10 @@ post_install_actions:
       cp "${DDEV_APPROOT}/.ddev/drupal-vrt/defaults/drupal-vrt.yaml" "${DDEV_APPROOT}/.ddev/drupal-vrt.yaml"
       echo "Created .ddev/drupal-vrt.yaml from defaults — edit to customize which pages are tested."
     fi
+    if [ ! -f "${DDEV_APPROOT}/.ddev/drupal-vrt.css" ]; then
+      cp "${DDEV_APPROOT}/.ddev/drupal-vrt/defaults/drupal-vrt.css" "${DDEV_APPROOT}/.ddev/drupal-vrt.css"
+      echo "Created .ddev/drupal-vrt.css — add CSS rules here to hide site-specific dynamic content."
+    fi
     echo ""
     echo "VRT add-on installed! Next steps:"
     echo "  1. ddev restart"
