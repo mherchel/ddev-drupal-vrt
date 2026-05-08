@@ -68,7 +68,7 @@ if [ -z "$MODE" ] && [ "$HAS_PROJECT" = false ]; then
   fi
 fi
 
-CMD=(npx playwright test "${PASSTHROUGH_ARGS[@]}" --update-snapshots)
+CMD=(npx playwright test "${PASSTHROUGH_ARGS[@]}" --update-snapshots=all)
 
 VRT_MODE="$MODE" "${CMD[@]}"
 EXIT_CODE=$?
